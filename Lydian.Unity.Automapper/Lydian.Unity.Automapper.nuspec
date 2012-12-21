@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>Unity Automapper</title>
+    <authors>$author$</authors>
+    <owners>$author$</owners>
+    <projectUrl>http://cockneycoder.wordpress.com/tag/automapper/</projectUrl>
+    <iconUrl>https://public.sn2.livefilestore.com/y1pXhFZ4bPWKg-27RxURlH6IWhi_3QmhvTnhM8KM8VMDodFTfpT6Y0DbcCgvGD-AzGJ7V2-tu2iMaeSEOhL7-P3GA/Logo.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <summary>An easy-to-use auto-mapper for Unity.</summary>
+    <description>$description$</description>
+    <releaseNotes>Adds support for Policy Injection registration.</releaseNotes>
+    <copyright>Copyright 2012</copyright>
+   <tags>Unity container Auto registration Autoregistration dependency injection IoC DI inversion</tags>
+  </metadata>
+</package>
