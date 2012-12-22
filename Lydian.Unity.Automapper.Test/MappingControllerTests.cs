@@ -167,7 +167,7 @@ namespace Lydian.Unity.Automapper.Test
 
 		#endregion
 
-		#region Multimap tests
+		#region Multimap Behavior tests
 		[TestMethod]
 		public void RegisterTypes_MultimapBehaviorAndInterfaceNotMarkedAsMultimapWithOneConcrete_DoesNotCreateAsAMultimap()
 		{
@@ -189,7 +189,7 @@ namespace Lydian.Unity.Automapper.Test
 		}
 
 		[TestMethod]
-		public void RegisterTypes_MultimapBehaviorAndMultipleConcretesForInterface_UsesNamedMapping()
+		public void RegisterTypes_MultimapBehaviorAndInterfaceHasMultimapAttribute_UsesNamedMapping()
 		{
 			// Act
 			controller.RegisterTypes(MappingBehaviors.MultimapByDefault, typeof(IMultiInterface), typeof(ConcreteOneMulti), typeof(ConcreteTwoMulti));
@@ -197,6 +197,17 @@ namespace Lydian.Unity.Automapper.Test
 			// Assert
 			CheckRegistrationExists(typeof(IMultiInterface), typeof(ConcreteOneMulti), true);
 			CheckRegistrationExists(typeof(IMultiInterface), typeof(ConcreteTwoMulti), true);
+		}
+
+		[TestMethod]
+		public void RegisterTypes_MultimapBehaviorAndInterfaceDoesNotHaveMultimapAttribute_UsesNamedMapping()
+		{
+			// Act
+			controller.RegisterTypes(MappingBehaviors.MultimapByDefault, typeof(IInterfaceOne), typeof(ConcreteOne), typeof(DuplicateConcrete));
+
+			// Assert
+			CheckRegistrationExists(typeof(IInterfaceOne), typeof(ConcreteOne), true);
+			CheckRegistrationExists(typeof(IInterfaceOne), typeof(DuplicateConcrete), true);
 		}
 
 		[TestMethod]
@@ -377,7 +388,7 @@ namespace Lydian.Unity.Automapper.Test
 		}
 
 		#endregion
-
+		
 		#region Named Mappings tests
 		[TestMethod]
 		public void RegisterTypes_NamedMappingSpecified_RegistersWithThatName()

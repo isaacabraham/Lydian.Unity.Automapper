@@ -12,7 +12,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Dictionary.xml = Dictionary.xml
 		IsaacsRules.ruleset = IsaacsRules.ruleset
 		Local.testsettings = Local.testsettings
-		Lydian.Unity.Automapper1.vsmdi = Lydian.Unity.Automapper1.vsmdi
+		Lydian.Unity.Automapper.vsmdi = Lydian.Unity.Automapper.vsmdi
 		SharedAssemblyInfo.cs = SharedAssemblyInfo.cs
 		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings
 	EndProjectSection
@@ -26,40 +26,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConfigProviderAssembly", "ConfigProviderAssembly\ConfigProviderAssembly.csproj", "{9FA144FE-23A6-4F6C-8576-FC16EBF4037C}"
 EndProject
 Global
-	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 5
-		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccTeamFoundationServer = https://lydianconsulting.tfspreview.com/DefaultCollection
-		SccProjectUniqueName0 = Lydian.Unity.Automapper\\Lydian.Unity.Automapper.csproj
-		SccProjectName0 = Lydian.Unity.Automapper
-		SccAuxPath0 = https://lydianconsulting.tfspreview.com/defaultcollection
-		SccLocalPath0 = Lydian.Unity.Automapper
-		SccProvider0 = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccProjectUniqueName1 = Lydian.Unity.Automapper.Console\\Lydian.Unity.Automapper.Console.csproj
-		SccProjectName1 = Lydian.Unity.Automapper.Console
-		SccAuxPath1 = https://lydianconsulting.tfspreview.com/defaultcollection
-		SccLocalPath1 = Lydian.Unity.Automapper.Console
-		SccProvider1 = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccProjectUniqueName2 = Lydian.Unity.Automapper.Test.TestAssembly\\Lydian.Unity.Automapper.Test.TestAssembly.csproj
-		SccProjectTopLevelParentUniqueName2 = Lydian.Unity.Automapper.sln
-		SccProjectName2 = Lydian.Unity.Automapper.Test.TestAssembly
-		SccAuxPath2 = https://lydianconsulting.tfspreview.com/defaultcollection
-		SccLocalPath2 = Lydian.Unity.Automapper.Test.TestAssembly
-		SccProvider2 = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccProjectUniqueName3 = Lydian.Unity.Automapper.Test.OtherTestAssembly\\Lydian.Unity.Automapper.Test.TestAssemblyTwo.csproj
-		SccProjectTopLevelParentUniqueName3 = Lydian.Unity.Automapper.sln
-		SccProjectName3 = Lydian.Unity.Automapper.Test.OtherTestAssembly
-		SccAuxPath3 = https://lydianconsulting.tfspreview.com/defaultcollection
-		SccLocalPath3 = Lydian.Unity.Automapper.Test.OtherTestAssembly
-		SccProvider3 = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccProjectUniqueName4 = Lydian.Unity.Automapper.Test\\Lydian.Unity.Automapper.Test.csproj
-		SccProjectName4 = Lydian.Unity.Automapper.Test
-		SccAuxPath4 = https://lydianconsulting.tfspreview.com/defaultcollection
-		SccLocalPath4 = Lydian.Unity.Automapper.Test
-		SccProvider4 = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
-		CategoryFile = Lydian.Unity.Automapper1.vsmdi
+		CategoryFile = Lydian.Unity.Automapper.vsmdi
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

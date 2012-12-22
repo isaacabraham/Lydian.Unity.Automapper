@@ -12,7 +12,7 @@ namespace Lydian.Unity.Automapper
 	public sealed class AutomapperConfig
 	{
 		internal readonly List<Type> doNotMapTypes = new List<Type>();
-		internal readonly List<Tuple<Type, String>> namedMappings = new List<Tuple<Type, String>>();
+		internal readonly List<Tuple<Type, String>> explicitNamedMappings = new List<Tuple<Type, String>>();
 		internal readonly List<Type> multimapTypes = new List<Type>();
 		internal readonly List<Type> policyInjectionTypes = new List<Type>();
 		internal readonly List<Type> singletonTypes = new List<Type>();
@@ -35,7 +35,7 @@ namespace Lydian.Unity.Automapper
 			var configuration = Create();
 
 			configuration.doNotMapTypes.AddRange(source.Where(t => !t.IsMappable()));
-			configuration.namedMappings.AddRange(source.Select(t => Tuple.Create(t, t.GetMapAsName())).Where(pair => pair.Item2 != null));
+			configuration.explicitNamedMappings.AddRange(source.Select(t => Tuple.Create(t, t.GetMapAsName())).Where(pair => pair.Item2 != null));
 			configuration.multimapTypes.AddRange(source.Where(t => t.IsMultimap()));
 			configuration.policyInjectionTypes.AddRange(source.Where(t => t.HasPolicyInjection()));
 			configuration.singletonTypes.AddRange(source.Where(t => t.IsSingleton()));
@@ -66,7 +66,7 @@ namespace Lydian.Unity.Automapper
 			Contract.Requires(type != null, "type is null.");
 			Contract.Requires(!String.IsNullOrEmpty(name), "name is null or empty.");
 			
-			namedMappings.Add(Tuple.Create(type, name));
+			explicitNamedMappings.Add(Tuple.Create(type, name));
 			return this;
 		}
 		/// <summary>
@@ -106,17 +106,16 @@ namespace Lydian.Unity.Automapper
 			return this;
 		}
 
-
 		internal AutomapperConfig MergeWith(AutomapperConfig sourceConfig)
 		{
 			Contract.Requires(sourceConfig.doNotMapTypes != null);
-			Contract.Requires(sourceConfig.namedMappings != null);
+			Contract.Requires(sourceConfig.explicitNamedMappings != null);
 			Contract.Requires(sourceConfig.multimapTypes != null);
 			Contract.Requires(sourceConfig.policyInjectionTypes != null);
 			Contract.Requires(sourceConfig.singletonTypes != null);
 
 			doNotMapTypes.AddRange(sourceConfig.doNotMapTypes);
-			namedMappings.AddRange(sourceConfig.namedMappings);
+			explicitNamedMappings.AddRange(sourceConfig.explicitNamedMappings);
 			multimapTypes.AddRange(sourceConfig.multimapTypes);
 			policyInjectionTypes.AddRange(sourceConfig.policyInjectionTypes);
 			singletonTypes.AddRange(sourceConfig.singletonTypes);
@@ -129,20 +128,21 @@ namespace Lydian.Unity.Automapper
 			return multimapTypes
 					.Any(t => t == type);
 		}
+		internal Boolean IsNamedMapping(Type type)
+		{
+			return explicitNamedMappings.Any(t => t.Item1 == type);
+		}
 		internal String GetNamedMapping(TypeMapping mapping)
 		{
-			var explicitMapping = namedMappings
-									.Where(t => t.Item1 == mapping.To)
-									.Select(t => t.Item2)
-									.FirstOrDefault();
+			var explicitNamedMapping = explicitNamedMappings
+										.Where(t => t.Item1 == mapping.To)
+										.Select(t => t.Item2)
+										.FirstOrDefault();
 
-			if (explicitMapping != null)
-				return explicitMapping;
+			if (explicitNamedMapping != null)
+				return explicitNamedMapping;
 
-			if (IsMultimap(mapping.From))
-				return mapping.To.FullName;
-
-			return null;
+			return mapping.To.FullName;
 		}
 		internal Boolean PolicyInjectionRequired()
 		{
@@ -169,7 +169,7 @@ namespace Lydian.Unity.Automapper
 			Contract.Invariant(policyInjectionTypes != null);
 			Contract.Invariant(singletonTypes != null);
 			Contract.Invariant(doNotMapTypes != null);
-			Contract.Invariant(namedMappings != null);
+			Contract.Invariant(explicitNamedMappings != null);
 			Contract.Invariant(multimapTypes != null);
 		}
 	}
