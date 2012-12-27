@@ -9,8 +9,7 @@ namespace Lydian.Unity.Automapper
 	{
 		public IEnumerable<TypeMapping> CreateMappings(IEnumerable<Type> types, MappingBehaviors behaviors, AutomapperConfig configurationDetails)
 		{
-			var results = from availableInterface in types.AsParallel()
-														  .Where(type => type.IsInterface)
+			var results = from availableInterface in types.Where(type => type.IsInterface)
 														  .Where(configurationDetails.IsMappable)
 						  from concrete in types.Where(type => !type.IsInterface)
 												.Where(configurationDetails.IsMappable)

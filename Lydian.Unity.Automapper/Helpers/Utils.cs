@@ -7,7 +7,7 @@ namespace Lydian.Unity.Automapper
 	/// <summary>
 	/// Contains extension methods that operate over types, or collections of type, relating to automapping.
 	/// </summary>
-	internal static class ExtensionMethods
+	internal static class Utils
 	{
 		/// <summary>
 		/// Generates a tuple containing a comparison interface as well as a "target" interface that is bound to the type of the concrete.

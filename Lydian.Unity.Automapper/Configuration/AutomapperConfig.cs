@@ -41,10 +41,10 @@ namespace Lydian.Unity.Automapper
 			Contract.Requires(source != null, "source is null.");
 
 			var configuration = Create()
-									.AndDoNotMapFor(source.Where(type => type.HasAttribute<DoNotMapAttribute>()).ToArray())
-									.AndMapAsSingleton(source.Where(type => type.HasAttribute<SingletonAttribute>()).ToArray())
-									.AndUseMultimappingFor(source.Where(type => type.HasAttribute<MultimapAttribute>()).ToArray())
-									.AndUsePolicyInjectionFor(source.Where(type => type.HasAttribute<PolicyInjectionAttribute>()).ToArray());
+									.AndDoNotMapFor(source.Where(Utils.HasAttribute<DoNotMapAttribute>).ToArray())
+									.AndMapAsSingleton(source.Where(Utils.HasAttribute<SingletonAttribute>).ToArray())
+									.AndUseMultimappingFor(source.Where(Utils.HasAttribute<MultimapAttribute>).ToArray())
+									.AndUsePolicyInjectionFor(source.Where(Utils.HasAttribute<PolicyInjectionAttribute>).ToArray());
 
 			var namedMappings = source
 									.Select(t => Tuple.Create(t, t.GetMapAsName()))

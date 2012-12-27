@@ -13,25 +13,25 @@ namespace Lydian.Unity.Automapper
 	/// </summary>
 	internal sealed class MappingController
 	{
-		private readonly IUnityContainer container;
+		private readonly IUnityContainer target;
 		private readonly ITypeMappingFactory mappingFactory;
 		private readonly ITypeMappingHandler mappingHandler;
 
 		/// <summary>
 		/// Creates a new instance of the Registrar.
 		/// </summary>
-		/// <param name="container">The container to register mappings into.</param>
+		/// <param name="target">The container to register mappings into.</param>
 		/// <param name="mappingFactory">The factory to create mappings.</param>
 		/// <param name="mappingHandler">The handler to process mappings.</param>
-		public MappingController(IUnityContainer container, ITypeMappingFactory mappingFactory, ITypeMappingHandler mappingHandler)
+		public MappingController(IUnityContainer target, ITypeMappingFactory mappingFactory, ITypeMappingHandler mappingHandler)
 		{
-			Contract.Requires(container != null);
+			Contract.Requires(target != null);
 			Contract.Requires(mappingFactory != null);
 			Contract.Requires(mappingHandler != null);
 
 			this.mappingHandler = mappingHandler;
 			this.mappingFactory = mappingFactory;
-			this.container = container;
+			this.target = target;
 		}
 
 
@@ -46,13 +46,11 @@ namespace Lydian.Unity.Automapper
 		
 			var configurationDetails = GetConfigurationDetails(types);
 			var mappings = mappingFactory.CreateMappings(types, behaviors, configurationDetails);
-			return mappingHandler.PerformRegistrations(container, mappings, behaviors, configurationDetails);
+			return mappingHandler.PerformRegistrations(target, mappings, behaviors, configurationDetails);
 		}
 
-		private static AutomapperConfig GetConfigurationDetails(Type[] types)
+		private static AutomapperConfig GetConfigurationDetails(IEnumerable<Type> types)
 		{
-			Contract.Requires(types != null, "types is null.");
-
 			return types
 					.Where(type => typeof(IAutomapperConfigProvider).IsAssignableFrom(type))
 					.Select(providerType => (IAutomapperConfigProvider)Activator.CreateInstance(providerType))
@@ -79,7 +77,7 @@ namespace Lydian.Unity.Automapper
 		[ContractInvariantMethod]
 		private void ObjectInvariant()
 		{
-			Contract.Invariant(container != null);
+			Contract.Invariant(target != null);
 		}
 	}
 }

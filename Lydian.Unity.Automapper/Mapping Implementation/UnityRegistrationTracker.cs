@@ -12,20 +12,20 @@ namespace Lydian.Unity.Automapper
 	internal sealed class UnityRegistrationTracker
 	{
 		private readonly IEnumerable<ContainerRegistration> initialRegistrations;
-		private readonly IUnityContainer container;
+		private readonly IUnityContainer target;
 
 		/// <summary>
 		/// Creates a new instance of the UnityRegistrationTracker and begins tracking changes immediately.
 		/// </summary>
-		/// <param name="container">The container to track changes of.</param>
-		public UnityRegistrationTracker(IUnityContainer container)
+		/// <param name="target">The container to track changes of.</param>
+		public UnityRegistrationTracker(IUnityContainer target)
 		{
-			Contract.Requires(container != null, "container is null.");
+			Contract.Requires(target != null, "container is null.");
 			Contract.Ensures(initialRegistrations != null);
 
-			this.container = container;
-			Contract.Assume(container.Registrations != null);
-			initialRegistrations = container.Registrations.ToArray();
+			this.target = target;
+			Contract.Assume(target.Registrations != null);
+			initialRegistrations = target.Registrations.ToArray();
 		}
 		
 		[SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Code Contracts")]
@@ -33,9 +33,9 @@ namespace Lydian.Unity.Automapper
 		[ContractInvariantMethod]
 		private void ObjectInvariant()
 		{
-			Contract.Invariant(container != null);
+			Contract.Invariant(target != null);
 			Contract.Invariant(initialRegistrations != null);
-			Contract.Invariant(container.Registrations != null);
+			Contract.Invariant(target.Registrations != null);
 		}
 		
 		/// <summary>
@@ -44,7 +44,7 @@ namespace Lydian.Unity.Automapper
 		/// <returns>The collection of new registrations.</returns>
 		public IEnumerable<ContainerRegistration> GetNewRegistrations()
 		{
-			return container.Registrations.Except(initialRegistrations).ToArray();
+			return target.Registrations.Except(initialRegistrations).ToArray();
 		}
 	}
 }

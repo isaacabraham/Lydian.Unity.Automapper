@@ -11,13 +11,13 @@ namespace Lydian.Unity.Automapper
 	internal class TypeMappingHandler : ITypeMappingHandler
 	{
 		[SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification="Even catching exceptions to dispose of the lifetime manager does not remove this CA warning.")]
-		public IEnumerable<ContainerRegistration> PerformRegistrations(IUnityContainer container, IEnumerable<TypeMapping> typeMappings, MappingBehaviors mappingBehaviors, AutomapperConfig configurationDetails)
+		public IEnumerable<ContainerRegistration> PerformRegistrations(IUnityContainer target, IEnumerable<TypeMapping> typeMappings, MappingBehaviors mappingBehaviors, AutomapperConfig configurationDetails)
 		{
-			var changeTracker = new UnityRegistrationTracker(container);
-			var registrationNameFactory = new RegistrationNameFactory(configurationDetails, typeMappings);
+			var changeTracker = new UnityRegistrationTracker(target);
+			var registrationNameFactory = new RegistrationNameFactory(configurationDetails, typeMappings, mappingBehaviors);
 			var lifetimeManagerFactory = new LifetimeManagerFactory(configurationDetails);
-			var injectionMemberFactory = new InjectionMemberFactory(configurationDetails, container);
-			var mappingValidator = new TypeMappingValidator(configurationDetails, container, mappingBehaviors);
+			var injectionMemberFactory = new InjectionMemberFactory(configurationDetails, target);
+			var mappingValidator = new TypeMappingValidator(configurationDetails, target, mappingBehaviors);
 
 			foreach (var typeMapping in typeMappings)
 			{
@@ -25,9 +25,9 @@ namespace Lydian.Unity.Automapper
 				
 				var injectionMembers = injectionMemberFactory.CreateInjectionMembers(typeMapping);
 				var lifetimeManager = lifetimeManagerFactory.CreateLifetimeManager(typeMapping);
-				var registrationName = registrationNameFactory.GetRegistrationName(typeMapping, mappingBehaviors);
+				var registrationName = registrationNameFactory.GetRegistrationName(typeMapping);
 
-				container.RegisterType(typeMapping.From, typeMapping.To, registrationName, lifetimeManager, injectionMembers);
+				target.RegisterType(typeMapping.From, typeMapping.To, registrationName, lifetimeManager, injectionMembers);
 			}
 
 			return changeTracker.GetNewRegistrations();
@@ -35,7 +35,7 @@ namespace Lydian.Unity.Automapper
 
 		class TypeMappingValidator
 		{
-			private readonly IUnityContainer container;
+			private readonly IUnityContainer target;
 			private readonly AutomapperConfig configurationDetails;
 			private readonly MappingBehaviors mappingBehaviors;
 
@@ -43,11 +43,11 @@ namespace Lydian.Unity.Automapper
 			/// Initializes a new instance of the TypeMappingValidator class.
 			/// </summary>
 			/// <param name="configurationDetails"></param>
-			/// <param name="container"></param>
+			/// <param name="target"></param>
 			/// <param name="behaviors"></param>
-			public TypeMappingValidator(AutomapperConfig configurationDetails, IUnityContainer container, MappingBehaviors behaviors)
+			public TypeMappingValidator(AutomapperConfig configurationDetails, IUnityContainer target, MappingBehaviors behaviors)
 			{
-				this.container = container;
+				this.target = target;
 				this.configurationDetails = configurationDetails;
 				this.mappingBehaviors = behaviors;
 			}
@@ -56,25 +56,25 @@ namespace Lydian.Unity.Automapper
 			{
 				var usingMultimapping = mappingBehaviors.HasFlag(MappingBehaviors.MultimapByDefault) || configurationDetails.IsMultimap(mapping.From);
 				if (!usingMultimapping)
-					CheckForExistingTypeMapping(container, mapping);
-				CheckForExistingNamedMapping(container, mapping, configurationDetails);
+					CheckForExistingTypeMapping(target, mapping);
+				CheckForExistingNamedMapping(target, mapping, configurationDetails);
 			}
 
-			private static void CheckForExistingTypeMapping(IUnityContainer container, TypeMapping mapping)
+			private static void CheckForExistingTypeMapping(IUnityContainer target, TypeMapping mapping)
 			{
-				Contract.Assume(container.Registrations != null);
-				var existingRegistration = container.Registrations
+				Contract.Assume(target.Registrations != null);
+				var existingRegistration = target.Registrations
 													.FirstOrDefault(r => r.RegisteredType.Equals(mapping.From));
 				if (existingRegistration != null)
 					throw new DuplicateMappingException(mapping.From, existingRegistration.MappedToType, mapping.To);
 			}
 
-			private static void CheckForExistingNamedMapping(IUnityContainer container, TypeMapping mapping, AutomapperConfig configurationDetails)
+			private static void CheckForExistingNamedMapping(IUnityContainer target, TypeMapping mapping, AutomapperConfig configurationDetails)
 			{
-				Contract.Assume(container.Registrations != null);
+				Contract.Assume(target.Registrations != null);
 
 				var mappingName = configurationDetails.GetNamedMapping(mapping);
-				var existingRegistration = container.Registrations
+				var existingRegistration = target.Registrations
 													.Where(r => r.Name != null)
 													.Where(r => r.RegisteredType.Equals(mapping.From))
 													.Where(r => r.Name.Equals(mappingName))
@@ -88,12 +88,12 @@ namespace Lydian.Unity.Automapper
 		{
 			private readonly AutomapperConfig configurationDetails;
 			
-			public InjectionMemberFactory(AutomapperConfig configurationDetails, IUnityContainer container)
+			public InjectionMemberFactory(AutomapperConfig configurationDetails, IUnityContainer target)
 			{
 				this.configurationDetails = configurationDetails;
 				
 				if (configurationDetails.PolicyInjectionRequired())
-					container.AddNewExtension<Interception>();
+					target.AddNewExtension<Interception>();
 			}
 
 			public InjectionMember[] CreateInjectionMembers(TypeMapping typeMapping)
@@ -120,10 +120,12 @@ namespace Lydian.Unity.Automapper
 		class RegistrationNameFactory
 		{
 			private readonly AutomapperConfig configurationDetails;
+			private readonly MappingBehaviors mappingBehaviors;
 			private readonly IEnumerable<Type> multimapTypes;
 			
-			public RegistrationNameFactory(AutomapperConfig configurationDetails, IEnumerable<TypeMapping> typeMappings)
+			public RegistrationNameFactory(AutomapperConfig configurationDetails, IEnumerable<TypeMapping> typeMappings, MappingBehaviors mappingBehaviors)
 			{
+				this.mappingBehaviors = mappingBehaviors;
 				this.configurationDetails = configurationDetails;
 				multimapTypes = typeMappings
 									.GroupBy(t => t.From)
@@ -132,7 +134,7 @@ namespace Lydian.Unity.Automapper
 									.ToArray();
 			}
 
-			public String GetRegistrationName(TypeMapping typeMapping, MappingBehaviors mappingBehaviors)
+			public String GetRegistrationName(TypeMapping typeMapping)
 			{
 				var namedMappingRequested = configurationDetails.IsMultimap(typeMapping.From) || configurationDetails.IsNamedMapping(typeMapping.To);
 				var namedMappingRequired = mappingBehaviors.HasFlag(MappingBehaviors.MultimapByDefault) && multimapTypes.Contains(typeMapping.From);

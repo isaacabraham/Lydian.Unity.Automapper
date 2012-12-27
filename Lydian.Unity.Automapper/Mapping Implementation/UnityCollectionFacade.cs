@@ -14,9 +14,9 @@ namespace Lydian.Unity.Automapper
 		/// <summary>
 		/// Initializes a new instance of the CollectionFacade class.
 		/// </summary>
-		public UnityCollectionFacade(IUnityContainer container)
+		public UnityCollectionFacade(IUnityContainer target)
 		{
-			resolvedTypes = container.ResolveAll<T>();
+			resolvedTypes = target.ResolveAll<T>();
 		}
 
 		public IEnumerator<T> GetEnumerator()
