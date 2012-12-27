@@ -136,6 +136,7 @@
     <Compile Include="..\SharedAssemblyInfo.cs">
       <Link>SharedAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="TestableUnityConfigProvider.cs" />
     <Compile Include="TestTypes\BasicTypes.cs" />
     <Compile Include="TestTypes\ExamplePolicy.cs" />
     <Compile Include="TestTypes\MultiMapTypes.cs" />

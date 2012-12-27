@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Microsoft.Practices.Unity;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
-using Microsoft.Practices.Unity;
 
 namespace Lydian.Unity.Automapper
 {
@@ -12,16 +12,25 @@ namespace Lydian.Unity.Automapper
 	/// Handles auto-mapping of interfaces and concrete types into Unity.
 	/// </summary>
 	internal sealed class MappingController
-	{	
+	{
 		private readonly IUnityContainer container;
+		private readonly ITypeMappingFactory mappingFactory;
+		private readonly ITypeMappingHandler mappingHandler;
 
 		/// <summary>
 		/// Creates a new instance of the Registrar.
 		/// </summary>
 		/// <param name="container">The container to register mappings into.</param>
-		public MappingController(IUnityContainer container)
+		/// <param name="mappingFactory">The factory to create mappings.</param>
+		/// <param name="mappingHandler">The handler to process mappings.</param>
+		public MappingController(IUnityContainer container, ITypeMappingFactory mappingFactory, ITypeMappingHandler mappingHandler)
 		{
 			Contract.Requires(container != null);
+			Contract.Requires(mappingFactory != null);
+			Contract.Requires(mappingHandler != null);
+
+			this.mappingHandler = mappingHandler;
+			this.mappingFactory = mappingFactory;
 			this.container = container;
 		}
 
@@ -36,8 +45,8 @@ namespace Lydian.Unity.Automapper
 			Contract.Requires(types != null, "types");
 		
 			var configurationDetails = GetConfigurationDetails(types);
-			var mappings = TypeMappingFactory.CreateMappings(types, behaviors, configurationDetails);
-			return TypeMappingHandler.PerformRegistrations(container, mappings, behaviors, configurationDetails);
+			var mappings = mappingFactory.CreateMappings(types, behaviors, configurationDetails);
+			return mappingHandler.PerformRegistrations(container, mappings, behaviors, configurationDetails);
 		}
 
 		private static AutomapperConfig GetConfigurationDetails(Type[] types)

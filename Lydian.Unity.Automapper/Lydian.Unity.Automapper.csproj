@@ -259,6 +259,8 @@
     <Compile Include="Exceptions\DuplicateMappingException.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Configuration\IAutomapperConfigProvider.cs" />
+    <Compile Include="Mapping Implementation\ITypeMappingFactory.cs" />
+    <Compile Include="Mapping Implementation\ITypeMappingHandler.cs" />
     <Compile Include="Mapping Implementation\TypeMapping.cs" />
     <Compile Include="MappingBehaviors.cs" />
     <Compile Include="Mapping Implementation\TypeMappingFactory.cs" />

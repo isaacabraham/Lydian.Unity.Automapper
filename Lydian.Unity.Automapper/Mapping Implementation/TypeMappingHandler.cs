@@ -8,38 +8,24 @@ using System.Linq;
 
 namespace Lydian.Unity.Automapper
 {
-	/// <summary>
-	/// Carries out registrations on the container.
-	/// </summary>
-	internal static class TypeMappingHandler
+	internal class TypeMappingHandler : ITypeMappingHandler
 	{
-		/// <summary>
-		/// Performs registrations using a supplied set of Mappings and guiding behaviors on a container.
-		/// </summary>
-		/// <param name="container">The cotainer to use to perform registrations.</param>
-		/// <param name="typeMappings">The mappings to use.</param>
-		/// <param name="mappingBehaviors">The behaviours to help guide the registration process.</param>
-		/// <param name="configurationDetails">Details of the mappings, such as which types to ignore or to use policy injection with.</param>
-		/// <returns></returns>
 		[SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification="Even catching exceptions to dispose of the lifetime manager does not remove this CA warning.")]
-		public static IEnumerable<ContainerRegistration> PerformRegistrations(IUnityContainer container, IEnumerable<TypeMapping> typeMappings, MappingBehaviors mappingBehaviors, AutomapperConfig configurationDetails)
+		public IEnumerable<ContainerRegistration> PerformRegistrations(IUnityContainer container, IEnumerable<TypeMapping> typeMappings, MappingBehaviors mappingBehaviors, AutomapperConfig configurationDetails)
 		{
-			Contract.Requires(container != null, "container is null.");
-			Contract.Requires(typeMappings != null, "mappings is null.");
-
-			if (configurationDetails.PolicyInjectionRequired())
-				container.AddNewExtension<Interception>();
-
 			var changeTracker = new UnityRegistrationTracker(container);
-
-			var multimapTypes = GetTypesWithOneThanOneMapping(typeMappings);
+			var registrationNameFactory = new RegistrationNameFactory(configurationDetails, typeMappings);
+			var lifetimeManagerFactory = new LifetimeManagerFactory(configurationDetails);
+			var injectionMemberFactory = new InjectionMemberFactory(configurationDetails, container);
+			var mappingValidator = new TypeMappingValidator(configurationDetails, container, mappingBehaviors);
 
 			foreach (var typeMapping in typeMappings)
 			{
-				ValidateTypeMapping(container, mappingBehaviors, typeMapping, configurationDetails);
-				var injectionMembers = configurationDetails.IsPolicyInjection(typeMapping.From) ? new InjectionMember[] { new Interceptor<InterfaceInterceptor>(), new InterceptionBehavior<PolicyInjectionBehavior>() } : new InjectionMember[0];
-				var lifetimeManager = configurationDetails.IsSingleton(typeMapping.From) ? (LifetimeManager)new ContainerControlledLifetimeManager() : new TransientLifetimeManager();
-				var registrationName = GetRegistrationName(mappingBehaviors, configurationDetails, multimapTypes, typeMapping);
+				mappingValidator.ValidateTypeMapping(typeMapping);
+				
+				var injectionMembers = injectionMemberFactory.CreateInjectionMembers(typeMapping);
+				var lifetimeManager = lifetimeManagerFactory.CreateLifetimeManager(typeMapping);
+				var registrationName = registrationNameFactory.GetRegistrationName(typeMapping, mappingBehaviors);
 
 				container.RegisterType(typeMapping.From, typeMapping.To, registrationName, lifetimeManager, injectionMembers);
 			}
@@ -47,52 +33,111 @@ namespace Lydian.Unity.Automapper
 			return changeTracker.GetNewRegistrations();
 		}
 
-		private static Type[] GetTypesWithOneThanOneMapping(IEnumerable<TypeMapping> typeMappings)
+		class TypeMappingValidator
 		{
-			return typeMappings
-						.GroupBy(t => t.From)
-						.Where(t => t.Count() > 1)
-						.Select(group => group.Key)
-						.ToArray();
+			private readonly IUnityContainer container;
+			private readonly AutomapperConfig configurationDetails;
+			private readonly MappingBehaviors mappingBehaviors;
+
+			/// <summary>
+			/// Initializes a new instance of the TypeMappingValidator class.
+			/// </summary>
+			/// <param name="configurationDetails"></param>
+			/// <param name="container"></param>
+			/// <param name="behaviors"></param>
+			public TypeMappingValidator(AutomapperConfig configurationDetails, IUnityContainer container, MappingBehaviors behaviors)
+			{
+				this.container = container;
+				this.configurationDetails = configurationDetails;
+				this.mappingBehaviors = behaviors;
+			}
+
+			public void ValidateTypeMapping(TypeMapping mapping)
+			{
+				var usingMultimapping = mappingBehaviors.HasFlag(MappingBehaviors.MultimapByDefault) || configurationDetails.IsMultimap(mapping.From);
+				if (!usingMultimapping)
+					CheckForExistingTypeMapping(container, mapping);
+				CheckForExistingNamedMapping(container, mapping, configurationDetails);
+			}
+
+			private static void CheckForExistingTypeMapping(IUnityContainer container, TypeMapping mapping)
+			{
+				Contract.Assume(container.Registrations != null);
+				var existingRegistration = container.Registrations
+													.FirstOrDefault(r => r.RegisteredType.Equals(mapping.From));
+				if (existingRegistration != null)
+					throw new DuplicateMappingException(mapping.From, existingRegistration.MappedToType, mapping.To);
+			}
+
+			private static void CheckForExistingNamedMapping(IUnityContainer container, TypeMapping mapping, AutomapperConfig configurationDetails)
+			{
+				Contract.Assume(container.Registrations != null);
+
+				var mappingName = configurationDetails.GetNamedMapping(mapping);
+				var existingRegistration = container.Registrations
+													.Where(r => r.Name != null)
+													.Where(r => r.RegisteredType.Equals(mapping.From))
+													.Where(r => r.Name.Equals(mappingName))
+													.FirstOrDefault();
+				if (existingRegistration != null)
+					throw new DuplicateMappingException(mapping.From, existingRegistration.MappedToType, mapping.To, mappingName);
+			}
+
 		}
-
-		private static String GetRegistrationName(MappingBehaviors mappingBehaviors, AutomapperConfig configurationDetails, Type[] multimapTypes, TypeMapping typeMapping)
+		class InjectionMemberFactory
 		{
-			var namedMappingRequested = configurationDetails.IsMultimap(typeMapping.From) || configurationDetails.IsNamedMapping(typeMapping.To);
-			var namedMappingRequired = mappingBehaviors.HasFlag(MappingBehaviors.MultimapByDefault) && multimapTypes.Contains(typeMapping.From);
-			return namedMappingRequested || namedMappingRequired ? configurationDetails.GetNamedMapping(typeMapping) : null;
+			private readonly AutomapperConfig configurationDetails;
+			
+			public InjectionMemberFactory(AutomapperConfig configurationDetails, IUnityContainer container)
+			{
+				this.configurationDetails = configurationDetails;
+				
+				if (configurationDetails.PolicyInjectionRequired())
+					container.AddNewExtension<Interception>();
+			}
+
+			public InjectionMember[] CreateInjectionMembers(TypeMapping typeMapping)
+			{
+				return configurationDetails.IsPolicyInjection(typeMapping.From) ? new InjectionMember[] { new Interceptor<InterfaceInterceptor>(), new InterceptionBehavior<PolicyInjectionBehavior>() }
+																				: new InjectionMember[0];
+			}
 		}
-
-		private static void ValidateTypeMapping(IUnityContainer container, MappingBehaviors mappingBehaviors, TypeMapping mapping, AutomapperConfig configurationDetails)
+		class LifetimeManagerFactory
 		{
-			var usingMultimapping = configurationDetails.IsMultimap(mapping.From) || mappingBehaviors.HasFlag(MappingBehaviors.MultimapByDefault);
-			if (!usingMultimapping)
-				CheckForExistingTypeMapping(container, mapping);
-			CheckForExistingNamedMapping(container, mapping, configurationDetails);
+			private readonly AutomapperConfig configurationDetails;
+			
+			public LifetimeManagerFactory(AutomapperConfig configurationDetails)
+			{
+				this.configurationDetails = configurationDetails;
+			}
+
+			public LifetimeManager CreateLifetimeManager(TypeMapping typeMapping)
+			{
+				return configurationDetails.IsSingleton(typeMapping.From) ? (LifetimeManager)new ContainerControlledLifetimeManager()
+																	      : new TransientLifetimeManager();
+			}
 		}
-
-		private static void CheckForExistingTypeMapping(IUnityContainer container, TypeMapping mapping)
+		class RegistrationNameFactory
 		{
-			Contract.Assume(container.Registrations != null);
-			var existingRegistration = container.Registrations
-												.FirstOrDefault(r => r.RegisteredType.Equals(mapping.From));
-			if (existingRegistration != null)
-				throw new DuplicateMappingException(mapping.From, existingRegistration.MappedToType, mapping.To);
-		}
+			private readonly AutomapperConfig configurationDetails;
+			private readonly IEnumerable<Type> multimapTypes;
+			
+			public RegistrationNameFactory(AutomapperConfig configurationDetails, IEnumerable<TypeMapping> typeMappings)
+			{
+				this.configurationDetails = configurationDetails;
+				multimapTypes = typeMappings
+									.GroupBy(t => t.From)
+									.Where(t => t.Count() > 1)
+									.Select(group => group.Key)
+									.ToArray();
+			}
 
-		private static void CheckForExistingNamedMapping(IUnityContainer container, TypeMapping mapping, AutomapperConfig configurationDetails)
-		{
-			Contract.Assume(container.Registrations != null);
-
-			var mappingName = configurationDetails.GetNamedMapping(mapping);
-
-			var existingRegistration = container.Registrations
-												.Where(r => r.Name != null)
-												.Where(r => r.RegisteredType.Equals(mapping.From))
-												.Where(r => r.Name.Equals(mappingName))
-												.FirstOrDefault();
-			if (existingRegistration != null)
-				throw new DuplicateMappingException(mapping.From, existingRegistration.MappedToType, mapping.To, mappingName);
+			public String GetRegistrationName(TypeMapping typeMapping, MappingBehaviors mappingBehaviors)
+			{
+				var namedMappingRequested = configurationDetails.IsMultimap(typeMapping.From) || configurationDetails.IsNamedMapping(typeMapping.To);
+				var namedMappingRequired = mappingBehaviors.HasFlag(MappingBehaviors.MultimapByDefault) && multimapTypes.Contains(typeMapping.From);
+				return namedMappingRequested || namedMappingRequired ? configurationDetails.GetNamedMapping(typeMapping) : null;
+			}
 		}
 	}
 }

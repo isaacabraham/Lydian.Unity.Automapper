@@ -11,7 +11,7 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <summary>An easy-to-use auto-mapper for Unity.</summary>
     <description>$description$</description>
-    <releaseNotes>Adds support for Policy Injection registration.</releaseNotes>
+    <releaseNotes>Adds support for fluent API.</releaseNotes>
     <copyright>Copyright 2012</copyright>
    <tags>Unity container Auto registration Autoregistration dependency injection IoC DI inversion</tags>
   </metadata>

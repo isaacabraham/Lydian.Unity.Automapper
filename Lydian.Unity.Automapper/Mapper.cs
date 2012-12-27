@@ -1,8 +1,7 @@
+using Microsoft.Practices.Unity;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
-using Microsoft.Practices.Unity;
 
 namespace Lydian.Unity.Automapper
 {
@@ -39,7 +38,8 @@ namespace Lydian.Unity.Automapper
 			Contract.Requires<ArgumentNullException>(options != null, "options");
 			Contract.Requires<ArgumentNullException>(types != null, "types");
 
-			new MappingController(container).RegisterTypes(options.Behaviors, types);
+			var controller = CreateController(container);
+			controller.RegisterTypes(options.Behaviors, types);
 		}
 
 		/// <summary>
@@ -68,7 +68,13 @@ namespace Lydian.Unity.Automapper
 			Contract.Requires<ArgumentNullException>(options != null, "options");
 			Contract.Requires<ArgumentNullException>(assemblyNames != null, "assemblyNames");
 
-			new MappingController(container).RegisterAssemblies(options.Behaviors, assemblyNames);
+			var controller = CreateController(container);
+			controller.RegisterAssemblies(options.Behaviors, assemblyNames);
+		}
+
+		private static MappingController CreateController(IUnityContainer container)
+		{
+			return new MappingController(container, new TypeMappingFactory(), new TypeMappingHandler());
 		}
 	}
 }
