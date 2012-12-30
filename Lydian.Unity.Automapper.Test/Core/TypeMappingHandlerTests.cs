@@ -7,7 +7,7 @@ using Moq;
 using System;
 using System.Linq;
 
-namespace Lydian.Unity.Automapper.Test
+namespace Lydian.Unity.Automapper.Test.Core
 {
 	[TestClass]
 	public class TypeMappingHandlerTests

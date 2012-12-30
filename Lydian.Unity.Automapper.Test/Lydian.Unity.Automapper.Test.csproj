@@ -139,13 +139,15 @@
     <Compile Include="..\SharedAssemblyInfo.cs">
       <Link>SharedAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Core\Handling\ConfigLifetimeManagerFactoryTests.cs" />
+    <Compile Include="Core\Handling\InjectionMemberFactoryTests.cs" />
     <Compile Include="TestableUnityConfigProvider.cs" />
     <Compile Include="TestTypes\BasicTypes.cs" />
     <Compile Include="TestTypes\ExamplePolicy.cs" />
     <Compile Include="MappingControllerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestTypes\GenericTypes.cs" />
-    <Compile Include="TypeMappingHandlerTests.cs" />
+    <Compile Include="Core\TypeMappingHandlerTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ConfigProviderAssembly\ConfigProviderAssembly.csproj">

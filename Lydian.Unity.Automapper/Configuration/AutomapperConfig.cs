@@ -18,9 +18,7 @@ namespace Lydian.Unity.Automapper
 		private readonly List<Type> policyInjectionTypes = new List<Type>();
 		private readonly List<Type> singletonTypes = new List<Type>();
 
-		private AutomapperConfig()
-		{
-		}
+		private AutomapperConfig() { }
 
 		/// <summary>
 		/// Creates a new UnityAutomapperConfig that can be composed using chained fluent-API style methods.
@@ -42,10 +40,10 @@ namespace Lydian.Unity.Automapper
 			Contract.Requires(source != null, "source is null.");
 
 			var configuration = Create()
-									.AndDoNotMapFor(source.Where(Lydian.Unity.Automapper.Core.Utils.HasAttribute<DoNotMapAttribute>).ToArray())
-									.AndMapAsSingleton(source.Where(Lydian.Unity.Automapper.Core.Utils.HasAttribute<SingletonAttribute>).ToArray())
-									.AndUseMultimappingFor(source.Where(Lydian.Unity.Automapper.Core.Utils.HasAttribute<MultimapAttribute>).ToArray())
-									.AndUsePolicyInjectionFor(source.Where(Lydian.Unity.Automapper.Core.Utils.HasAttribute<PolicyInjectionAttribute>).ToArray());
+									.AndDoNotMapFor(source.Where(Utils.HasAttribute<DoNotMapAttribute>).ToArray())
+									.AndMapAsSingleton(source.Where(Utils.HasAttribute<SingletonAttribute>).ToArray())
+									.AndUseMultimappingFor(source.Where(Utils.HasAttribute<MultimapAttribute>).ToArray())
+									.AndUsePolicyInjectionFor(source.Where(Utils.HasAttribute<PolicyInjectionAttribute>).ToArray());
 
 			var namedMappings = source
 									.Select(t => Tuple.Create(t, t.GetMapAsName()))
@@ -167,7 +165,7 @@ namespace Lydian.Unity.Automapper
 		{
 			return !doNotMapTypes.Any(t => t == type);
 		}
-		internal String GetNamedMapping(Lydian.Unity.Automapper.Core.TypeMapping mapping)
+		internal String GetNamedMapping(TypeMapping mapping)
 		{
 			var explicitNamedMapping = explicitNamedMappings
 										.Where(t => t.Item1 == mapping.To)
