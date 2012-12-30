@@ -1,10 +1,10 @@
+using Microsoft.Practices.Unity;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using Microsoft.Practices.Unity;
 
-namespace Lydian.Unity.Automapper
+namespace Lydian.Unity.Automapper.Core
 {
 	/// <summary>
 	/// Keeps track of registrations that have taken place on a Unity Container.

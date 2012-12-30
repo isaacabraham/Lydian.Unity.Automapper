@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 
-namespace Lydian.Unity.Automapper
+namespace Lydian.Unity.Automapper.Core
 {
 	internal sealed class TypeMappingFactory : ITypeMappingFactory
 	{

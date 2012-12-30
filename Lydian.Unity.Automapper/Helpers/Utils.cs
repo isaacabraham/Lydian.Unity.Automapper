@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Lydian.Unity.Automapper
+namespace Lydian.Unity.Automapper.Core
 {
 	/// <summary>
 	/// Contains extension methods that operate over types, or collections of type, relating to automapping.

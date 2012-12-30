@@ -1,8 +1,11 @@
 ﻿using ConfigProviderAssembly;
+using Lydian.Unity.Automapper.Core;
+using Lydian.Unity.Automapper.Core.Handling;
 using Lydian.Unity.Automapper.Test.TestAssembly;
 using Lydian.Unity.Automapper.Test.TestAssemblyTwo;
 using Lydian.Unity.Automapper.Test.Types;
 using Microsoft.Practices.Unity;
+using Microsoft.Practices.Unity.InterceptionExtension;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -14,18 +17,24 @@ namespace Lydian.Unity.Automapper.Test
 	[TestClass]
 	public class MappingControllerTests
 	{
-		private UnityContainer container;
+		private UnityContainer target;
 		private MappingController controller;
 		private TypeMappingFactory factory;
-		private TypeMappingHandler handler;
 
 		[TestInitialize]
 		public void TestInit()
 		{
-			container = new UnityContainer();
+			target = new UnityContainer();
 			factory = new TypeMappingFactory();
-			handler = new TypeMappingHandler();
-			controller = new MappingController(container, factory, handler);
+			
+			var internalContainer = new UnityContainer();
+			internalContainer.RegisterType<ITypeMappingHandler, TypeMappingHandler>();
+			internalContainer.RegisterType<IRegistrationNameFactory, RegistrationNameFactory>();
+			internalContainer.RegisterType<ITypeMappingValidator, TypeMappingValidator>();
+			internalContainer.RegisterType<IConfigLifetimeManagerFactory, ConfigLifetimeManagerFactory>();
+			internalContainer.RegisterType<IInjectionMemberFactory, InjectionMemberFactory>();
+
+			controller = new MappingController(target, factory, internalContainer);
 
 			TestableUnityConfigProvider.Reset();
 		}
@@ -116,22 +125,22 @@ namespace Lydian.Unity.Automapper.Test
 			controller.RegisterTypes(MappingBehaviors.None, typeof(IInterface), typeof(InterfaceImplementation));
 
 			// Assert
-			var first = container.Resolve<IInterface>();
-			var second = container.Resolve<IInterface>();
+			var first = target.Resolve<IInterface>();
+			var second = target.Resolve<IInterface>();
 			Assert.AreNotSame(first, second);
 		}
 
 		[TestMethod]
 		public void RegisterTypes_InterfaceConfiguredAsSingleton_RegistersAsSingleton()
 		{
-			TestableUnityConfigProvider.Singletons = new[] { typeof(IInterface) };
+			TestableUnityConfigProvider.AddSingletons(typeof(IInterface));
 
 			// Act
 			controller.RegisterTypes(MappingBehaviors.None, typeof(IInterface), typeof(InterfaceImplementation), typeof(TestableUnityConfigProvider));
 
 			// Assert
-			var first = container.Resolve<IInterface>();
-			var second = container.Resolve<IInterface>();
+			var first = target.Resolve<IInterface>();
+			var second = target.Resolve<IInterface>();
 			Assert.AreSame(first, second);
 		}
 
@@ -142,14 +151,14 @@ namespace Lydian.Unity.Automapper.Test
 			// Act
 			try
 			{
-				controller.RegisterTypes(MappingBehaviors.None, typeof(IInterfaceOne), typeof(ConcreteOne), typeof(DuplicateConcrete));
+				controller.RegisterTypes(MappingBehaviors.None, typeof(IInterface), typeof(InterfaceImplementation), typeof(InterfaceImplementationTwo));
 			}
 			catch (DuplicateMappingException ex)
 			{
-				Assert.AreEqual(typeof(IInterfaceOne), ex.MappingInterface);
-				Assert.AreEqual(typeof(ConcreteOne), ex.MappedConcrete);
-				Assert.AreEqual(typeof(DuplicateConcrete), ex.DuplicateMappingConcrete);
-				Assert.AreEqual("Attempted to map at least two concrete types (Lydian.Unity.Automapper.Test.Types.ConcreteOne and Lydian.Unity.Automapper.Test.Types.DuplicateConcrete) to the same interface (Lydian.Unity.Automapper.Test.Types.IInterfaceOne).", ex.Message);
+				Assert.AreEqual(typeof(IInterface), ex.MappingInterface);
+				Assert.AreEqual(typeof(InterfaceImplementation), ex.MappedConcrete);
+				Assert.AreEqual(typeof(InterfaceImplementationTwo), ex.DuplicateMappingConcrete);
+				Assert.AreEqual("Attempted to map at least two concrete types (Lydian.Unity.Automapper.Test.Types.InterfaceImplementation and Lydian.Unity.Automapper.Test.Types.InterfaceImplementationTwo) to the same interface (Lydian.Unity.Automapper.Test.Types.IInterface).", ex.Message);
 				throw;
 			}
 		}
@@ -160,15 +169,15 @@ namespace Lydian.Unity.Automapper.Test
 			// Act
 			try
 			{
-				controller.RegisterTypes(MappingBehaviors.None, typeof(IInterfaceOne), typeof(ConcreteOne));
-				controller.RegisterTypes(MappingBehaviors.None, typeof(IInterfaceOne), typeof(DuplicateConcrete));
+				controller.RegisterTypes(MappingBehaviors.None, typeof(IInterface), typeof(InterfaceImplementation));
+				controller.RegisterTypes(MappingBehaviors.None, typeof(IInterface), typeof(InterfaceImplementationTwo));
 			}
 			catch (DuplicateMappingException ex)
 			{
-				Assert.AreEqual(typeof(IInterfaceOne), ex.MappingInterface);
-				Assert.AreEqual(typeof(ConcreteOne), ex.MappedConcrete);
-				Assert.AreEqual(typeof(DuplicateConcrete), ex.DuplicateMappingConcrete);
-				Assert.AreEqual("Attempted to map at least two concrete types (Lydian.Unity.Automapper.Test.Types.ConcreteOne and Lydian.Unity.Automapper.Test.Types.DuplicateConcrete) to the same interface (Lydian.Unity.Automapper.Test.Types.IInterfaceOne).", ex.Message);
+				Assert.AreEqual(typeof(IInterface), ex.MappingInterface);
+				Assert.AreEqual(typeof(InterfaceImplementation), ex.MappedConcrete);
+				Assert.AreEqual(typeof(InterfaceImplementationTwo), ex.DuplicateMappingConcrete);
+				Assert.AreEqual("Attempted to map at least two concrete types (Lydian.Unity.Automapper.Test.Types.InterfaceImplementation and Lydian.Unity.Automapper.Test.Types.InterfaceImplementationTwo) to the same interface (Lydian.Unity.Automapper.Test.Types.IInterface).", ex.Message);
 				throw;
 			}
 		}
@@ -330,7 +339,7 @@ namespace Lydian.Unity.Automapper.Test
 			controller.RegisterTypes(MappingBehaviors.None, typeof(IInterface), typeof(InterfaceImplementation), typeof(InterfaceImplementationTwo), typeof(TestableUnityConfigProvider));
 
 			// Assert
-			var allConcretes = container.ResolveAll<IInterface>();
+			var allConcretes = target.ResolveAll<IInterface>();
 			Assert.IsTrue(allConcretes.Any(c => c is InterfaceImplementation));
 			Assert.IsTrue(allConcretes.Any(c => c is InterfaceImplementationTwo));
 		}
@@ -338,78 +347,91 @@ namespace Lydian.Unity.Automapper.Test
 		[TestMethod]
 		public void RegisterTypes_ConcreteGenericMultiRegistration_IsNamedWithType()
 		{
+			TestableUnityConfigProvider.AddMultimaps(typeof(IInterface));
+
 			// Act
-			controller.RegisterTypes(MappingBehaviors.None, typeof(IMultiInterface), typeof(GenericMulti<Int32>));
+			controller.RegisterTypes(MappingBehaviors.None, typeof(IInterface), typeof(OpenGenericImplementation<Int32>), typeof(TestableUnityConfigProvider));
 
 			// Assert
-			container.ResolveAll<IMultiInterface>().ToArray();
-			CheckRegistrationExists(typeof(IMultiInterface), typeof(GenericMulti<Int32>), true);
+			CheckRegistrationExists(typeof(IInterface), typeof(OpenGenericImplementation<Int32>), true);
 		}
 
 		[TestMethod]
 		public void RegisterTypes_DifferentGenericArgumentsSameTypeForMultimap_BothAreMapped()
 		{
+			TestableUnityConfigProvider.AddMultimaps(typeof(IInterface));
+
 			// Act
-			controller.RegisterTypes(MappingBehaviors.None, typeof(IMultiInterface), typeof(GenericMulti<Int32>), typeof(GenericMulti<String>));
+			controller.RegisterTypes(MappingBehaviors.None, typeof(IInterface), typeof(OpenGenericImplementation<Int32>), typeof(OpenGenericImplementation<String>), typeof(TestableUnityConfigProvider));
 
 			// Assert
-			container.ResolveAll<IMultiInterface>().ToArray();
-			CheckRegistrationExists(typeof(IMultiInterface), typeof(GenericMulti<Int32>), true);
-			CheckRegistrationExists(typeof(IMultiInterface), typeof(GenericMulti<String>), true);
+			target.ResolveAll<IInterface>().ToArray();
+			CheckRegistrationExists(typeof(IInterface), typeof(OpenGenericImplementation<Int32>), true);
+			CheckRegistrationExists(typeof(IInterface), typeof(OpenGenericImplementation<String>), true);
 		}
 
 		[TestMethod]
 		public void RegisterTypes_ClosedGenericTypeRegisteredToMultimap_MappedWithCorrectName()
 		{
+			TestableUnityConfigProvider.AddMultimaps(typeof(IInterface));
+
 			// Act
-			controller.RegisterTypes(MappingBehaviors.None, typeof(IMultiInterface), typeof(ClosedGenericMulti));
+			controller.RegisterTypes(MappingBehaviors.None, typeof(IInterface), typeof(ClosedGenericImplementation), typeof(TestableUnityConfigProvider));
 
 			// Assert
-			CheckRegistrationExists(typeof(IMultiInterface), typeof(ClosedGenericMulti), true);
+			CheckRegistrationExists(typeof(IInterface), typeof(ClosedGenericImplementation), true);
 		}
 
 		[TestMethod]
 		public void RegisterTypes_ClosedGenericAndOpenMappedToMultimap_BothMapped()
 		{
+			TestableUnityConfigProvider.AddMultimaps(typeof(IInterface));
+
 			// Act
-			controller.RegisterTypes(MappingBehaviors.None, typeof(IMultiInterface), typeof(ClosedGenericMulti), typeof(GenericMulti<Boolean>));
+			controller.RegisterTypes(MappingBehaviors.None, typeof(IInterface), typeof(ClosedGenericImplementation), typeof(OpenGenericImplementation<Boolean>), typeof(TestableUnityConfigProvider));
 
 			// Assert
-			CheckRegistrationExists(typeof(IMultiInterface), typeof(ClosedGenericMulti), true);
-			CheckRegistrationExists(typeof(IMultiInterface), typeof(GenericMulti<Boolean>), true);
+			CheckRegistrationExists(typeof(IInterface), typeof(ClosedGenericImplementation), true);
+			CheckRegistrationExists(typeof(IInterface), typeof(OpenGenericImplementation<Boolean>), true);
 		}
 
 		[TestMethod]
 		public void RegisterTypes_OpenGenericInterfaceMultimap_RegistersAllConcretes()
 		{
+			TestableUnityConfigProvider.AddMultimaps(typeof(IGenericInterface<,>));
+
 			// Act
-			controller.RegisterTypes(MappingBehaviors.None, typeof(IMultiGeneric<>), typeof(MultiGenericConcrete<>), typeof(MultiGenericConcreteTwo<>));
+			controller.RegisterTypes(MappingBehaviors.None, typeof(IGenericInterface<,>), typeof(OpenGenericConcrete<,>), typeof(OpenGenericConcreteTwo<,>), typeof(TestableUnityConfigProvider));
 
 			// Assert
-			CheckRegistrationExists(typeof(IMultiGeneric<String>), typeof(MultiGenericConcrete<String>), true);
-			CheckRegistrationExists(typeof(IMultiGeneric<String>), typeof(MultiGenericConcreteTwo<String>), true);
+			CheckRegistrationExists(typeof(IGenericInterface<String, String>), typeof(OpenGenericConcrete<String, String>), true);
+			CheckRegistrationExists(typeof(IGenericInterface<String, String>), typeof(OpenGenericConcreteTwo<String, String>), true);
 		}
 
 		[TestMethod]
 		public void RegisterTypes_OpenAndClosedTypesRegisteredToOpenGenericMultimap_RegistersAllConcretes()
 		{
+			TestableUnityConfigProvider.AddMultimaps(typeof(IGenericInterface<,>));
+
 			// Act
-			controller.RegisterTypes(MappingBehaviors.None, typeof(IMultiGeneric<>), typeof(MultiGenericConcrete<>), typeof(MultiGenericConcreteTwo<>), typeof(MultiGenericClosedConcrete));
+			controller.RegisterTypes(MappingBehaviors.None, typeof(IGenericInterface<,>), typeof(OpenGenericConcrete<,>), typeof(OpenGenericConcreteTwo<,>), typeof(ClosedGenericConcrete), typeof(TestableUnityConfigProvider));
 
 			// Assert
-			CheckRegistrationExists(typeof(IMultiGeneric<String>), typeof(MultiGenericConcrete<String>), true);
-			CheckRegistrationExists(typeof(IMultiGeneric<String>), typeof(MultiGenericConcreteTwo<String>), true);
-			CheckRegistrationExists(typeof(IMultiGeneric<String>), typeof(MultiGenericClosedConcrete), true);
+			CheckRegistrationExists(typeof(IGenericInterface<String, String>), typeof(OpenGenericConcrete<String, String>), true);
+			CheckRegistrationExists(typeof(IGenericInterface<String, String>), typeof(OpenGenericConcreteTwo<String, String>), true);
+			CheckRegistrationExists(typeof(IGenericInterface<String, Boolean>), typeof(ClosedGenericConcrete), true);
 		}
 
 		[TestMethod]
 		public void RegisterTypes_ClosedTypesRegisteredToOpenGenericMultimap_OnlyRegistersForTheSpecificGenericArgument()
 		{
+			TestableUnityConfigProvider.AddMultimaps(typeof(IGenericInterface<,>));
+
 			// Act
-			controller.RegisterTypes(MappingBehaviors.None, typeof(IMultiGeneric<>), typeof(MultiGenericClosedConcrete));
+			controller.RegisterTypes(MappingBehaviors.None, typeof(IGenericInterface<,>), typeof(ClosedGenericConcrete), typeof(TestableUnityConfigProvider));
 
 			// Assert
-			var resolutions = container.ResolveAll<IMultiGeneric<Boolean>>();
+			var resolutions = target.ResolveAll<IGenericInterface<String, String>>();
 			Assert.IsFalse(resolutions.Any());
 		}
 
@@ -473,13 +495,13 @@ namespace Lydian.Unity.Automapper.Test
 		public void RegisterTypes_AutomaticCollectionRegistration_CreatesAMultimapCollection()
 		{
 			// Act
-			controller.RegisterTypes(MappingBehaviors.CollectionRegistration | MappingBehaviors.MultimapByDefault, typeof(IMultiInterface), typeof(ConcreteOneMulti), typeof(ConcreteTwoMulti));
+			controller.RegisterTypes(MappingBehaviors.CollectionRegistration | MappingBehaviors.MultimapByDefault, typeof(IInterface), typeof(InterfaceImplementation), typeof(InterfaceImplementationTwo));
 
 			// Asert
-			var collection = container.Resolve<IEnumerable<IMultiInterface>>();
+			var collection = target.Resolve<IEnumerable<IInterface>>();
 			Assert.AreEqual(2, collection.Count());
-			Assert.IsTrue(collection.Any(c => c is ConcreteOneMulti));
-			Assert.IsTrue(collection.Any(c => c is ConcreteTwoMulti));
+			Assert.IsTrue(collection.Any(c => c is InterfaceImplementation));
+			Assert.IsTrue(collection.Any(c => c is InterfaceImplementationTwo));
 		}
 
 		[TestMethod]
@@ -487,10 +509,10 @@ namespace Lydian.Unity.Automapper.Test
 		{
 			// Act
 			controller.RegisterTypes(MappingBehaviors.CollectionRegistration | MappingBehaviors.MultimapByDefault,
-			typeof(IInterfaceOne), typeof(ConcreteOne),
-			typeof(IMultiInterface), typeof(ConcreteOneMulti), typeof(ConcreteTwoMulti));
+									 typeof(IOther), typeof(OtherImplementation),
+									 typeof(IInterface), typeof(InterfaceImplementation), typeof(InterfaceImplementationTwo));
 			// Assert
-			CheckRegistrationExists(typeof(IInterfaceOne), typeof(ConcreteOne));
+			CheckRegistrationExists(typeof(IOther), typeof(OtherImplementation));
 		}
 
 		[TestMethod]
@@ -498,10 +520,10 @@ namespace Lydian.Unity.Automapper.Test
 		{
 			// Act
 			controller.RegisterTypes(MappingBehaviors.MultimapByDefault,
-			typeof(IMultiInterface), typeof(ConcreteOneMulti), typeof(ConcreteTwoMulti));
+									 typeof(IInterface), typeof(InterfaceImplementation), typeof(InterfaceImplementationTwo));
 
 			// Asert
-			Assert.IsFalse(container.Registrations.Any(r => r.RegisteredType == typeof(IEnumerable<IInterfaceOne>)));
+			Assert.IsFalse(target.Registrations.Any(r => r.RegisteredType == typeof(IEnumerable<IInterface>)));
 		}
 
 		#endregion
@@ -545,48 +567,52 @@ namespace Lydian.Unity.Automapper.Test
 		}
 
 		#endregion
-
+		
 		#region Policy Injection tests
 		[TestMethod]
 		public void RegisterTypes_PolicyInjectionRequested_RegistersWithInjection()
 		{
+			TestableUnityConfigProvider.AddPolicyInjection(typeof(IInterface));
+
 			// Act
-			controller.RegisterTypes(MappingBehaviors.None, typeof(IPolicyInterface), typeof(PolicyConcrete));
+			controller.RegisterTypes(MappingBehaviors.None, typeof(IInterface), typeof(InterfaceImplementation), typeof(TestableUnityConfigProvider));
 
 			// Assert
-			var resolvedType = container.Resolve<IPolicyInterface>();
-			Assert.AreNotEqual(typeof(PolicyConcrete), resolvedType.GetType());
+			var resolvedType = target.Resolve<IInterface>();
+			Assert.AreNotEqual(typeof(InterfaceImplementation), resolvedType.GetType());
 		}
 
 		[TestMethod]
 		public void RegisterTypes_PolicyInjectionNotRequested_DoesNotActivateInterceptionExtension()
 		{
 			// Act
-			controller.RegisterTypes(MappingBehaviors.None, typeof(INonPolicyInterface), typeof(PolicyConcrete));
+			controller.RegisterTypes(MappingBehaviors.None, typeof(IInterface), typeof(InterfaceImplementation));
 
 			// Assert
-			Assert.IsTrue(container.Registrations.All(r => !r.RegisteredType.Name.Equals("InjectionPolicy")));
+			Assert.IsTrue(target.Registrations.All(r => !r.RegisteredType.Equals(typeof(InjectionPolicy))));
 		}
 
 		[TestMethod]
 		public void RegisterTypes_PolicyInjectionRequested_ActivatesInterceptionExtension()
 		{
+			TestableUnityConfigProvider.AddPolicyInjection(typeof(IInterface));
+
 			// Act
-			controller.RegisterTypes(MappingBehaviors.None, typeof(IPolicyInterface), typeof(PolicyConcrete));
+			controller.RegisterTypes(MappingBehaviors.None, typeof(IInterface), typeof(InterfaceImplementation), typeof(TestableUnityConfigProvider));
 
 			// Assert
-			Assert.IsTrue(container.Registrations.Any(r => r.RegisteredType.Name.Equals("InjectionPolicy")));
+			Assert.IsTrue(target.Registrations.Any(r => r.RegisteredType.Equals(typeof(InjectionPolicy))));
 		}
 
 		[TestMethod]
 		public void RegisterTypes_PolicyInjectionNotRequested_DoesNotRegisterWithInjection()
 		{
 			// Act
-			controller.RegisterTypes(MappingBehaviors.None, typeof(INonPolicyInterface), typeof(PolicyConcrete));
+			controller.RegisterTypes(MappingBehaviors.None, typeof(IInterface), typeof(InterfaceImplementation));
 
 			// Assert
-			var resolvedType = container.Resolve<INonPolicyInterface>();
-			Assert.AreEqual(typeof(PolicyConcrete), resolvedType.GetType());
+			var resolvedType = target.Resolve<IInterface>();
+			Assert.AreEqual(typeof(InterfaceImplementation), resolvedType.GetType());
 		}
 
 		#endregion
@@ -599,7 +625,7 @@ namespace Lydian.Unity.Automapper.Test
 			controller.RegisterAssemblies(MappingBehaviors.None, "ConfigProviderAssembly");
 
 			// Assert
-			var registrationExists = container.Registrations.Any(r => r.RegisteredType == typeof(InterfaceToIgnore));
+			var registrationExists = target.Registrations.Any(r => r.RegisteredType == typeof(InterfaceToIgnore));
 			Assert.IsFalse(registrationExists);
 		}
 
@@ -610,7 +636,7 @@ namespace Lydian.Unity.Automapper.Test
 			controller.RegisterAssemblies(MappingBehaviors.None, "ConfigProviderAssembly");
 
 			// Assert
-			var registration = container.Registrations.First(r => r.RegisteredType == typeof(SingletonInterface));
+			var registration = target.Registrations.First(r => r.RegisteredType == typeof(SingletonInterface));
 			Assert.IsInstanceOfType(registration.LifetimeManager, typeof(ContainerControlledLifetimeManager));
 		}
 
@@ -621,7 +647,7 @@ namespace Lydian.Unity.Automapper.Test
 			controller.RegisterAssemblies(MappingBehaviors.None, "ConfigProviderAssembly");
 
 			// Assert
-			var concretes = container.ResolveAll<MultimappingInterface>();
+			var concretes = target.ResolveAll<MultimappingInterface>();
 			Assert.AreEqual(2, concretes.Count());
 		}
 
@@ -632,14 +658,14 @@ namespace Lydian.Unity.Automapper.Test
 			controller.RegisterAssemblies(MappingBehaviors.None, "ConfigProviderAssembly");
 
 			// Assert
-			var concrete = container.Resolve<MultimappingInterface>("Bananas");
+			var concrete = target.Resolve<MultimappingInterface>("Bananas");
 			Assert.IsInstanceOfType(concrete, typeof(NamedType));
 		}
 		#endregion
 
 		private void AssertNumberOfExpectedCustomMappings(Int32 expectedMappings)
 		{
-			var actualCustomMappings = container.Registrations.Count() - 1;
+			var actualCustomMappings = target.Registrations.Count() - 1;
 			Assert.AreEqual(expectedMappings, actualCustomMappings, String.Format("Should be {0} custom mappings in the container.", expectedMappings));
 		}
 
@@ -648,7 +674,7 @@ namespace Lydian.Unity.Automapper.Test
 			try
 			{
 				mappingName = mappingName ?? (!isNamedMapping ? null : fromType.IsGenericType && toType.IsGenericType ? toType.GetGenericTypeDefinition().FullName : toType.FullName);
-				var resolvedToType = container.Resolve(fromType, mappingName).GetType();
+				var resolvedToType = target.Resolve(fromType, mappingName).GetType();
 				Assert.AreEqual(toType, resolvedToType, String.Format("Mapping is not correct! Expected mapping from {0} to {1}, but mapping goes to {2}", fromType.FullName, toType.FullName, resolvedToType.FullName));
 			}
 			catch (Exception ex)

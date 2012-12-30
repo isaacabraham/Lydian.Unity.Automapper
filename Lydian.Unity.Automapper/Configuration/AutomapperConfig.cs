@@ -1,3 +1,4 @@
+using Lydian.Unity.Automapper.Core;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -41,10 +42,10 @@ namespace Lydian.Unity.Automapper
 			Contract.Requires(source != null, "source is null.");
 
 			var configuration = Create()
-									.AndDoNotMapFor(source.Where(Utils.HasAttribute<DoNotMapAttribute>).ToArray())
-									.AndMapAsSingleton(source.Where(Utils.HasAttribute<SingletonAttribute>).ToArray())
-									.AndUseMultimappingFor(source.Where(Utils.HasAttribute<MultimapAttribute>).ToArray())
-									.AndUsePolicyInjectionFor(source.Where(Utils.HasAttribute<PolicyInjectionAttribute>).ToArray());
+									.AndDoNotMapFor(source.Where(Lydian.Unity.Automapper.Core.Utils.HasAttribute<DoNotMapAttribute>).ToArray())
+									.AndMapAsSingleton(source.Where(Lydian.Unity.Automapper.Core.Utils.HasAttribute<SingletonAttribute>).ToArray())
+									.AndUseMultimappingFor(source.Where(Lydian.Unity.Automapper.Core.Utils.HasAttribute<MultimapAttribute>).ToArray())
+									.AndUsePolicyInjectionFor(source.Where(Lydian.Unity.Automapper.Core.Utils.HasAttribute<PolicyInjectionAttribute>).ToArray());
 
 			var namedMappings = source
 									.Select(t => Tuple.Create(t, t.GetMapAsName()))
@@ -166,7 +167,7 @@ namespace Lydian.Unity.Automapper
 		{
 			return !doNotMapTypes.Any(t => t == type);
 		}
-		internal String GetNamedMapping(TypeMapping mapping)
+		internal String GetNamedMapping(Lydian.Unity.Automapper.Core.TypeMapping mapping)
 		{
 			var explicitNamedMapping = explicitNamedMappings
 										.Where(t => t.Item1 == mapping.To)

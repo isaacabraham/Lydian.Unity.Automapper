@@ -5,17 +5,19 @@ namespace Lydian.Unity.Automapper.Test
 {
 	internal class TestableUnityConfigProvider : IAutomapperConfigProvider
 	{
-		private static List<Type> doNotMaps { get; set; }
-		static public Type[] Singletons { get; set; }
-		private static List<Type> multimaps { get; set; }
-		private static List<Tuple<Type, String>> namedMappings { get; set; }
+		private static List<Type> doNotMaps;
+		private static List<Type> singletons;
+		private static List<Type> multimaps;
+		private static List<Type> policyInjections;
+		private static List<Tuple<Type, String>> namedMappings;
 
 		public static void Reset()
 		{
-			Singletons = new Type[0];
+			singletons = new List<Type>();
 			multimaps = new List<Type>();
 			namedMappings = new List<Tuple<Type, String>>();
 			doNotMaps = new List<Type>();
+			policyInjections = new List<Type>();
 		}
 
 		public static void AddDoNotMaps(params Type[] types)
@@ -33,10 +35,21 @@ namespace Lydian.Unity.Automapper.Test
 			multimaps.AddRange(types);
 		}
 
+		public static void AddSingletons(params Type[] types)
+		{
+			singletons.AddRange(types);
+		}
+
+		public static void AddPolicyInjection(params Type[] types)
+		{
+			policyInjections.AddRange(types);
+		}
+
 		public AutomapperConfig CreateConfiguration()
 		{
 			var config = AutomapperConfig.Create()
-								   .AndMapAsSingleton(Singletons)
+								   .AndMapAsSingleton(singletons.ToArray())
+								   .AndUsePolicyInjectionFor(policyInjections.ToArray())
 								   .AndUseMultimappingFor(multimaps.ToArray())
 								   .AndDoNotMapFor(doNotMaps.ToArray());
 

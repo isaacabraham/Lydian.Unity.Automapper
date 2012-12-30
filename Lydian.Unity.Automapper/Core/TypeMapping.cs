@@ -1,8 +1,6 @@
 using System;
-using Microsoft.Practices.Unity;
-using System.Diagnostics.CodeAnalysis;
 
-namespace Lydian.Unity.Automapper
+namespace Lydian.Unity.Automapper.Core
 {
 	/// <summary>
 	/// Represents a potential mapping between two types.

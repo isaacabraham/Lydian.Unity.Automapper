@@ -6,6 +6,7 @@ namespace Lydian.Unity.Automapper.Test.Types
 {
 	public interface IGenericInterface<T1, T2> { }
 	public class OpenGenericConcrete<T1, T2> : IGenericInterface<T1, T2> { }
+	public class OpenGenericConcreteTwo<T1, T2> : IGenericInterface<T1, T2> { }
 	public class ClosedGenericConcrete : IGenericInterface<String, Boolean> { }
 	public class EnumerableConcrete : IGenericInterface<String, Boolean>, IEnumerable<String>
 	{

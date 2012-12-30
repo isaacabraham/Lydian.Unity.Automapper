@@ -6,30 +6,30 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
 
-namespace Lydian.Unity.Automapper
+namespace Lydian.Unity.Automapper.Core
 {
 	/// <summary>
 	/// Handles auto-mapping of interfaces and concrete types into Unity.
 	/// </summary>
 	internal sealed class MappingController
 	{
+		private readonly IUnityContainer internalContainer;
 		private readonly IUnityContainer target;
 		private readonly ITypeMappingFactory mappingFactory;
-		private readonly ITypeMappingHandler mappingHandler;
 
 		/// <summary>
 		/// Creates a new instance of the Registrar.
 		/// </summary>
 		/// <param name="target">The container to register mappings into.</param>
 		/// <param name="mappingFactory">The factory to create mappings.</param>
-		/// <param name="mappingHandler">The handler to process mappings.</param>
-		public MappingController(IUnityContainer target, ITypeMappingFactory mappingFactory, ITypeMappingHandler mappingHandler)
+		/// <param name="internalContainer">The container used internally by the mapper itself. This is NOT the target for registration!</param>
+		public MappingController(IUnityContainer target, ITypeMappingFactory mappingFactory, IUnityContainer internalContainer)
 		{
 			Contract.Requires(target != null);
 			Contract.Requires(mappingFactory != null);
-			Contract.Requires(mappingHandler != null);
+			Contract.Requires(internalContainer != null);
 
-			this.mappingHandler = mappingHandler;
+			this.internalContainer = internalContainer;
 			this.mappingFactory = mappingFactory;
 			this.target = target;
 		}
@@ -46,7 +46,14 @@ namespace Lydian.Unity.Automapper
 		
 			var configurationDetails = GetConfigurationDetails(types);
 			var mappings = mappingFactory.CreateMappings(types, behaviors, configurationDetails);
-			return mappingHandler.PerformRegistrations(target, mappings, behaviors, configurationDetails);
+
+			var configParameter = new DependencyOverride<AutomapperConfig>(configurationDetails);
+			var mappingParameter = new DependencyOverride<IEnumerable<TypeMapping>>(mappings);
+			var behaviorParameter = new DependencyOverride<MappingBehaviors>(behaviors);
+			var containerParameter = new DependencyOverride<IUnityContainer>(target);
+			
+			var mappingHandler = internalContainer.Resolve<ITypeMappingHandler>(configParameter, mappingParameter, behaviorParameter, containerParameter);
+			return mappingHandler.PerformRegistrations(target, mappings);
 		}
 
 		private static AutomapperConfig GetConfigurationDetails(IEnumerable<Type> types)

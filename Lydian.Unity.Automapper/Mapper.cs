@@ -1,3 +1,4 @@
+using Lydian.Unity.Automapper.Core;
 using Microsoft.Practices.Unity;
 using System;
 using System.Diagnostics.CodeAnalysis;
@@ -72,9 +73,11 @@ namespace Lydian.Unity.Automapper
 			controller.RegisterAssemblies(options.Behaviors, assemblyNames);
 		}
 
-		private static MappingController CreateController(IUnityContainer container)
+		private static MappingController CreateController(IUnityContainer target)
 		{
-			return new MappingController(container, new TypeMappingFactory(), new TypeMappingHandler());
+			var internalContainer = new UnityContainer();
+			internalContainer.RegisterType<ITypeMappingHandler, TypeMappingHandler>();
+			return new MappingController(target, new TypeMappingFactory(), internalContainer);
 		}
 	}
 }

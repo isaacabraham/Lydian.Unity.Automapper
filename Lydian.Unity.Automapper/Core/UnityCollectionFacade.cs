@@ -1,8 +1,8 @@
+using Microsoft.Practices.Unity;
 using System.Collections;
 using System.Collections.Generic;
-using Microsoft.Practices.Unity;
 
-namespace Lydian.Unity.Automapper
+namespace Lydian.Unity.Automapper.Core
 {
 	/// <summary>
 	/// A facade on top of a Unity call to ResolveAll for a particular type.

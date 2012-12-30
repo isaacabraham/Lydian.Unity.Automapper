@@ -1,4 +1,3 @@
-
 namespace Lydian.Unity.Automapper
 {
 	/// <summary>
