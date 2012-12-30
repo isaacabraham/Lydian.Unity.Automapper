@@ -145,6 +145,7 @@
     <Compile Include="MappingControllerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestTypes\GenericTypes.cs" />
+    <Compile Include="TypeMappingHandlerTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ConfigProviderAssembly\ConfigProviderAssembly.csproj">

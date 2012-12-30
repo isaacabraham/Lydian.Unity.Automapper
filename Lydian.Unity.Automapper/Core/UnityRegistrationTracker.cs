@@ -1,4 +1,5 @@
 using Microsoft.Practices.Unity;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
@@ -9,7 +10,7 @@ namespace Lydian.Unity.Automapper.Core
 	/// <summary>
 	/// Keeps track of registrations that have taken place on a Unity Container.
 	/// </summary>
-	internal sealed class UnityRegistrationTracker
+	internal sealed class UnityRegistrationTracker : IEqualityComparer<ContainerRegistration>
 	{
 		private readonly IEnumerable<ContainerRegistration> initialRegistrations;
 		private readonly IUnityContainer target;
@@ -20,7 +21,7 @@ namespace Lydian.Unity.Automapper.Core
 		/// <param name="target">The container to track changes of.</param>
 		public UnityRegistrationTracker(IUnityContainer target)
 		{
-			Contract.Requires(target != null, "container is null.");
+			Contract.Requires(target != null, "target is null.");
 			Contract.Ensures(initialRegistrations != null);
 
 			this.target = target;
@@ -44,7 +45,19 @@ namespace Lydian.Unity.Automapper.Core
 		/// <returns>The collection of new registrations.</returns>
 		public IEnumerable<ContainerRegistration> GetNewRegistrations()
 		{
-			return target.Registrations.Except(initialRegistrations).ToArray();
+			return target.Registrations.Except(initialRegistrations, this).ToArray();
+		}
+
+		public Boolean Equals(ContainerRegistration x, ContainerRegistration y)
+		{
+			return x.MappedToType.Equals(y.MappedToType)
+				&& x.RegisteredType.Equals(y.MappedToType)
+				&& String.Equals(x.Name, y.Name);
+		}
+
+		public Int32 GetHashCode(ContainerRegistration obj)
+		{
+			return (obj.MappedToType.FullName + obj.RegisteredType.FullName + obj.Name).GetHashCode();
 		}
 	}
 }

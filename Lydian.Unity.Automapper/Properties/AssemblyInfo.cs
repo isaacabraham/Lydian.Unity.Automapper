@@ -3,5 +3,4 @@ using System.Runtime.CompilerServices;
 
 [assembly: AssemblyTitle("Lydian.Unity.Automapper")]
 [assembly: InternalsVisibleTo("Lydian.Unity.Automapper.Test")]
-
-//PublicKey=0024000004800000940000000602000000240000525341310004000001000100c16ba9c968a28d202c10929e0243f92be10fbcd17f0494e5082a7a1f5e583e3f6fcf2d8f4f54ca16c12a03b0ba851b6cda150666845c0fb4ebaf3dd75248719887ea4e63a40fbc44b8813cd6632fbbcad1142b5fbf1fe963e40fad64f9314b46d477aff333d56295cc3dd7476a4ac8d0b03665acccf2ea3022b90de2dd857acb
+[assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
