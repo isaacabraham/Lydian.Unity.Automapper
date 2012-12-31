@@ -41,8 +41,9 @@ namespace Lydian.Unity.Automapper.Test.Core
 			mappingFactory.Verify(mf => mf.CreateMappings(MappingBehaviors.None, It.Is<AutomapperConfig>(ac => ac != null), types));
 		}
 
+		#region Provider-based tests
 		[TestMethod]
-		public void RegisterTypes_OneConfigurationFound_ConfigurationMergedIntoOutput()
+		public void RegisterTypes_SingletonConfiguration_MergedIntoOutput()
 		{
 			TestableUnityConfigProvider.AddSingletons(typeof(String));
 			var types = new[] { typeof(TestableUnityConfigProvider) };
@@ -55,18 +56,59 @@ namespace Lydian.Unity.Automapper.Test.Core
 		}
 
 		[TestMethod]
-		public void RegisterTypes_ManyConfigurationsFound_ConfigurationsMergedIntoOutput()
+		public void RegisterTypes_MultimapConfiguration_MergedIntoOutput()
 		{
-			TestableUnityConfigProvider.AddSingletons(typeof(String));
-			var types = new[] { typeof(TestableUnityConfigProvider), typeof(SecondaryConfigProvider) };
+			TestableUnityConfigProvider.AddMultimaps(typeof(String));
+			var types = new[] { typeof(TestableUnityConfigProvider) };
 
 			// Act
 			controller.RegisterTypes(MappingBehaviors.None, types);
 
 			// Assert
-			mappingFactory.Verify(mf => mf.CreateMappings(MappingBehaviors.None, It.Is<AutomapperConfig>(ac => (!ac.IsMappable(typeof(Int32)) && ac.IsSingleton(typeof(String)))), types));
+			mappingFactory.Verify(mf => mf.CreateMappings(MappingBehaviors.None, It.Is<AutomapperConfig>(ac => ac.IsMultimap(typeof(String))), types));
 		}
 
+		[TestMethod]
+		public void RegisterTypes_NamedMappingConfiguration_MergedIntoOutput()
+		{
+			TestableUnityConfigProvider.AddNamedMapping(typeof(String), "TEST");
+			var types = new[] { typeof(TestableUnityConfigProvider) };
+
+			// Act
+			controller.RegisterTypes(MappingBehaviors.None, types);
+
+			// Assert
+			mappingFactory.Verify(mf => mf.CreateMappings(MappingBehaviors.None, It.Is<AutomapperConfig>(ac => ac.IsNamedMapping(typeof(String))), types));
+		}
+
+		[TestMethod]
+		public void RegisterTypes_DoNotMapConfiguration_MergedIntoOutput()
+		{
+			TestableUnityConfigProvider.AddDoNotMaps(typeof(String));
+			var types = new[] { typeof(TestableUnityConfigProvider) };
+
+			// Act
+			controller.RegisterTypes(MappingBehaviors.None, types);
+
+			// Assert
+			mappingFactory.Verify(mf => mf.CreateMappings(MappingBehaviors.None, It.Is<AutomapperConfig>(ac => !ac.IsMappable(typeof(String))), types));
+		}
+
+		[TestMethod]
+		public void RegisterTypes_PolicyInjectionConfiguration_MergedIntoOutput()
+		{
+			TestableUnityConfigProvider.AddPolicyInjection(typeof(String));
+			var types = new[] { typeof(TestableUnityConfigProvider) };
+
+			// Act
+			controller.RegisterTypes(MappingBehaviors.None, types);
+
+			// Assert
+			mappingFactory.Verify(mf => mf.CreateMappings(MappingBehaviors.None, It.Is<AutomapperConfig>(ac => ac.IsPolicyInjection(typeof(String))), types));
+		}
+		#endregion
+
+		#region Attribute-derived tests
 		[TestMethod]
 		public void RegisterTypes_SuppliedTypesHasSingletonAttribute_MergedIntoOutput()
 		{
@@ -125,6 +167,20 @@ namespace Lydian.Unity.Automapper.Test.Core
 
 			// Assert
 			mappingFactory.Verify(mf => mf.CreateMappings(MappingBehaviors.None, It.Is<AutomapperConfig>(ac => ac.IsNamedMapping(typeof(INamedMapping))), types));
+		}
+#endregion
+
+		[TestMethod]
+		public void RegisterTypes_ManyConfigurationsFound_ConfigurationsMergedIntoOutput()
+		{
+			TestableUnityConfigProvider.AddSingletons(typeof(String));
+			var types = new[] { typeof(TestableUnityConfigProvider), typeof(SecondaryConfigProvider) };
+
+			// Act
+			controller.RegisterTypes(MappingBehaviors.None, types);
+
+			// Assert
+			mappingFactory.Verify(mf => mf.CreateMappings(MappingBehaviors.None, It.Is<AutomapperConfig>(ac => (!ac.IsMappable(typeof(Int32)) && ac.IsSingleton(typeof(String)))), types));
 		}
 
 		[TestMethod]

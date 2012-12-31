@@ -1,6 +1,8 @@
-﻿using Lydian.Disposable;
+﻿using ConfigProviderAssembly;
+using Lydian.Disposable;
 using Lydian.Disposable.Switches;
 using Lydian.Unity.Automapper;
+using Lydian.Unity.Automapper.Test.TestAssembly;
 using Microsoft.Practices.Unity;
 using Microsoft.Practices.Unity.InterceptionExtension;
 using System;
@@ -70,7 +72,7 @@ namespace ConsoleApplication1
 			PerformSmokeTest(MappingBehaviors.MultimapByDefault);
 			PerformSmokeTest(MappingBehaviors.CollectionRegistration);
 			PerformSmokeTest(MappingBehaviors.MultimapByDefault | MappingBehaviors.CollectionRegistration);
-			
+
 			using (new ColorSwitch(ConsoleColor.Yellow).AsDisposable())
 			using (new DisposableAdapter<InvertedColourSwitch>())
 				Console.WriteLine("All smoke tests completed!");
@@ -88,7 +90,7 @@ namespace ConsoleApplication1
 
 				try
 				{
-					container.AutomapAssemblies(new MappingOptions { Behaviors = behaviors }, Assembly.GetExecutingAssembly().FullName);
+					container.AutomapAssemblies(new MappingOptions { Behaviors = behaviors }, Assembly.GetExecutingAssembly().FullName, "ConfigProviderAssembly", "Lydian.Unity.Automapper.Test.TestAssembly", "Lydian.Unity.Automapper.Test.TestAssemblyTwo");
 				}
 				catch (Exception ex)
 				{
@@ -106,6 +108,12 @@ namespace ConsoleApplication1
 				TestRegistration<IMyGenericClass<Boolean, Object>>(container, "Second closed generic mapping");
 				TestRegistration<IMultimap>(container, "Multiple mappings", false);
 				TestRegistration<INamedInterface>(container, "Named mapping", mappingName: "Test");
+
+				TestRegistration<SingletonInterface>(container, "Provider-based singleton mapping");
+				TestRegistration<MultimappingInterface>(container, "Provider-based multi-mapping", singleMapping: false);
+
+				TestRegistration<IDependencyInversionPrinciple>(container, "Decoupled DIP mapping");
+
 				TestPolicyRegistration(container);
 			}
 		}
@@ -150,7 +158,7 @@ namespace ConsoleApplication1
 				using (new DisposableAdapter<InvertedColourSwitch>())
 					Console.WriteLine("Failed during mapping: policy injection did not take place");
 			}
-	
+
 			using (new DisposableAdapter<InvertedColourSwitch>())
 				Console.WriteLine("Done!");
 		}
