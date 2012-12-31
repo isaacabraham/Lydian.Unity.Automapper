@@ -7,7 +7,7 @@ namespace Lydian.Unity.Automapper.Core
 {
 	internal sealed class TypeMappingFactory : ITypeMappingFactory
 	{
-		public IEnumerable<TypeMapping> CreateMappings(IEnumerable<Type> types, MappingBehaviors behaviors, AutomapperConfig configurationDetails)
+		public IEnumerable<TypeMapping> CreateMappings(MappingBehaviors behaviors, AutomapperConfig configurationDetails, params Type[] types)
 		{
 			var results = from availableInterface in types.Where(type => type.IsInterface)
 														  .Where(configurationDetails.IsMappable)

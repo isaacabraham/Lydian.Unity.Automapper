@@ -43,15 +43,15 @@ namespace Lydian.Unity.Automapper.Core
 		public IEnumerable<ContainerRegistration> RegisterTypes(MappingBehaviors behaviors, params Type[] types)
 		{
 			Contract.Requires(types != null, "types");
-		
+
 			var configurationDetails = GetConfigurationDetails(types);
-			var mappings = mappingFactory.CreateMappings(types, behaviors, configurationDetails);
+			var mappings = mappingFactory.CreateMappings(behaviors, configurationDetails, types);
 
 			var configParameter = new DependencyOverride<AutomapperConfig>(configurationDetails);
 			var mappingParameter = new DependencyOverride<IEnumerable<TypeMapping>>(mappings);
 			var behaviorParameter = new DependencyOverride<MappingBehaviors>(behaviors);
 			var containerParameter = new DependencyOverride<IUnityContainer>(target);
-			
+
 			var mappingHandler = internalContainer.Resolve<ITypeMappingHandler>(configParameter, mappingParameter, behaviorParameter, containerParameter);
 			return mappingHandler.PerformRegistrations(target, mappings);
 		}

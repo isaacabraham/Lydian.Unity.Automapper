@@ -1,12 +1,9 @@
 using Lydian.Unity.Automapper.Core;
-using Lydian.Unity.Automapper.Core.Handling;
 using Microsoft.Practices.Unity;
-using Microsoft.Practices.Unity.InterceptionExtension;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Lydian.Unity.Automapper.Test.Core
 {
@@ -41,20 +38,20 @@ namespace Lydian.Unity.Automapper.Test.Core
 			controller.RegisterTypes(MappingBehaviors.None, types);
 
 			// Assert
-			mappingFactory.Verify(mf => mf.CreateMappings(types, MappingBehaviors.None, It.Is<AutomapperConfig>(ac => ac != null)));
+			mappingFactory.Verify(mf => mf.CreateMappings(MappingBehaviors.None, It.Is<AutomapperConfig>(ac => ac != null), types));
 		}
 
 		[TestMethod]
 		public void RegisterTypes_OneConfigurationFound_ConfigurationMergedIntoOutput()
 		{
 			TestableUnityConfigProvider.AddSingletons(typeof(String));
-			var types = new [] { typeof (TestableUnityConfigProvider) };
+			var types = new[] { typeof(TestableUnityConfigProvider) };
 
 			// Act
 			controller.RegisterTypes(MappingBehaviors.None, types);
 
 			// Assert
-			mappingFactory.Verify(mf => mf.CreateMappings(types, MappingBehaviors.None, It.Is<AutomapperConfig>(ac => ac.IsSingleton(typeof(String)))));
+			mappingFactory.Verify(mf => mf.CreateMappings(MappingBehaviors.None, It.Is<AutomapperConfig>(ac => ac.IsSingleton(typeof(String))), types));
 		}
 
 		[TestMethod]
@@ -67,19 +64,67 @@ namespace Lydian.Unity.Automapper.Test.Core
 			controller.RegisterTypes(MappingBehaviors.None, types);
 
 			// Assert
-			mappingFactory.Verify(mf => mf.CreateMappings(types, MappingBehaviors.None, It.Is<AutomapperConfig>(ac => (!ac.IsMappable(typeof(Int32)) && ac.IsSingleton(typeof(String))))));
+			mappingFactory.Verify(mf => mf.CreateMappings(MappingBehaviors.None, It.Is<AutomapperConfig>(ac => (!ac.IsMappable(typeof(Int32)) && ac.IsSingleton(typeof(String)))), types));
 		}
 
 		[TestMethod]
-		public void RegisterTypes_SuppliedTypesHasAttribute_MergedIntoOutput()
+		public void RegisterTypes_SuppliedTypesHasSingletonAttribute_MergedIntoOutput()
 		{
-			var types = new[] { typeof(ISampleMapping), typeof(SecondaryConfigProvider) };
+			var types = new[] { typeof(ISingleton), typeof(SecondaryConfigProvider) };
 
 			// Act
 			controller.RegisterTypes(MappingBehaviors.None, types);
 
 			// Assert
-			mappingFactory.Verify(mf => mf.CreateMappings(types, MappingBehaviors.None, It.Is<AutomapperConfig>(ac => (!ac.IsMappable(typeof(Int32)) && ac.IsSingleton(typeof(ISampleMapping))))));
+			mappingFactory.Verify(mf => mf.CreateMappings(MappingBehaviors.None, It.Is<AutomapperConfig>(ac => (!ac.IsMappable(typeof(Int32)) && ac.IsSingleton(typeof(ISingleton)))), types));
+		}
+
+		[TestMethod]
+		public void RegisterTypes_SuppliedTypesHasDoNotMapAttribute_MergedIntoOutput()
+		{
+			var types = new[] { typeof(IDoNotMap) };
+
+			// Act
+			controller.RegisterTypes(MappingBehaviors.None, types);
+
+			// Assert
+			mappingFactory.Verify(mf => mf.CreateMappings(MappingBehaviors.None, It.Is<AutomapperConfig>(ac => !ac.IsMappable(typeof(IDoNotMap))), types));
+		}
+
+		[TestMethod]
+		public void RegisterTypes_SuppliedTypesHasMultimapAttribute_MergedIntoOutput()
+		{
+			var types = new[] { typeof(IMultiMap) };
+
+			// Act
+			controller.RegisterTypes(MappingBehaviors.None, types);
+
+			// Assert
+			mappingFactory.Verify(mf => mf.CreateMappings(MappingBehaviors.None, It.Is<AutomapperConfig>(ac => ac.IsMultimap(typeof(IMultiMap))), types));
+		}
+
+		[TestMethod]
+		public void RegisterTypes_SuppliedTypesHasPolicyInjectionAttribute_MergedIntoOutput()
+		{
+			var types = new[] { typeof(IPolicyInjection) };
+
+			// Act
+			controller.RegisterTypes(MappingBehaviors.None, types);
+
+			// Assert
+			mappingFactory.Verify(mf => mf.CreateMappings(MappingBehaviors.None, It.Is<AutomapperConfig>(ac => ac.IsPolicyInjection(typeof(IPolicyInjection))), types));
+		}
+
+		[TestMethod]
+		public void RegisterTypes_SuppliedTypesHasNamedMappingAttribute_MergedIntoOutput()
+		{
+			var types = new[] { typeof(INamedMapping) };
+
+			// Act
+			controller.RegisterTypes(MappingBehaviors.None, types);
+
+			// Assert
+			mappingFactory.Verify(mf => mf.CreateMappings(MappingBehaviors.None, It.Is<AutomapperConfig>(ac => ac.IsNamedMapping(typeof(INamedMapping))), types));
 		}
 
 		[TestMethod]
@@ -99,12 +144,12 @@ namespace Lydian.Unity.Automapper.Test.Core
 		public void RegisterTypes_ResolvedHandler_PerformsRegistrations()
 		{
 			var mappings = new TypeMapping[0];
-			mappingFactory.Setup(mf => mf.CreateMappings(It.IsAny<IEnumerable<Type>>(), It.IsAny<MappingBehaviors>(), It.IsAny<AutomapperConfig>()))
+			mappingFactory.Setup(mf => mf.CreateMappings(It.IsAny<MappingBehaviors>(), It.IsAny<AutomapperConfig>(), It.IsAny<Type[]>()))
 						  .Returns(mappings);
 
 			// Act
 			controller.RegisterTypes(MappingBehaviors.None);
-		
+
 			// Assert
 			mappingHandler.Verify(mh => mh.PerformRegistrations(target.Object, mappings));
 		}
@@ -123,8 +168,11 @@ namespace Lydian.Unity.Automapper.Test.Core
 			Assert.AreSame(registrations, result);
 		}
 
-		[Singleton]
-		public interface ISampleMapping { }
+		[Singleton]		  public interface ISingleton { }
+		[DoNotMap]		  public interface IDoNotMap { }
+		[Multimap]		  public interface IMultiMap { }
+		[PolicyInjection] public interface IPolicyInjection { }
+		[MapAs("Foo")]	  public class INamedMapping { }
 
 		public class SecondaryConfigProvider : IAutomapperConfigProvider
 		{
