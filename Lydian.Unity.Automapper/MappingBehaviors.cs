@@ -13,7 +13,7 @@ namespace Lydian.Unity.Automapper
 		/// </summary>
 		None = 0,
 		/// <summary>
-		/// If two types are mapped to the same interface, even if you do not specify the MultimapAttribute on the interface, multimap behaviour will be used.
+		/// If two types are mapped to the same interface, even if you do not specify the Multimapping on the source interface, multimap behaviour will be used.
 		/// </summary>
 		MultimapByDefault = 1,
 		/// <summary>

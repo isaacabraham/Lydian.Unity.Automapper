@@ -146,10 +146,91 @@ namespace Lydian.Unity.Automapper.Test.Core
 			// Assert
 			AssertMapping<IInterface, ClosedGenericImplementation>(mappings);
 		}
-		
 
+		#region Generic mapping tests
+		[TestMethod]
+		public void CreateMappings_OpenGenericInterfaceWithOpenImplementation_MapsIt()
+		{
+			// Act
+			var mappings = factory.CreateMappings(MappingBehaviors.None, AutomapperConfig.Create(),
+												  typeof(IGenericInterface<,>), typeof(OpenGenericConcrete<,>));
 
+			// Assert
+			AssertMapping(mappings, typeof(IGenericInterface<,>), typeof(OpenGenericConcrete<,>));
+		}
 
+		[TestMethod]
+		public void CreateMappings_GenericInterfaceWithClosedImplementation_MapsIt()
+		{
+			// Act
+			var mappings = factory.CreateMappings(MappingBehaviors.None, AutomapperConfig.Create(),
+												  typeof(IGenericInterface<,>), typeof(ClosedGenericConcrete));
+
+			// Assert
+			AssertMapping(mappings, typeof(IGenericInterface<String, Boolean>), typeof(ClosedGenericConcrete));
+		}
+
+		[TestMethod]
+		public void CreateMappings_GenericInterfaceMultipleImplementationsForDifferentTypes_MapsThem()
+		{
+			// Act
+			var mappings = factory.CreateMappings(MappingBehaviors.None, AutomapperConfig.Create(),
+												  typeof(IGenericInterface<,>), typeof(OpenGenericConcrete<,>), typeof(ClosedGenericConcrete));
+
+			// Assert
+			AssertMapping(mappings, typeof(IGenericInterface<,>), typeof(OpenGenericConcrete<,>));
+			AssertMapping(mappings, typeof(IGenericInterface<String, Boolean>), typeof(ClosedGenericConcrete));
+		}
+
+		[TestMethod]
+		public void CreateMappings_GenericInterfaceWithMultipleOpenImplementations_MapsThem()
+		{
+			// Act
+			var mappings = factory.CreateMappings(MappingBehaviors.None, AutomapperConfig.Create(),
+												  typeof(IGenericInterface<,>), typeof(OpenGenericConcrete<,>), typeof(OpenGenericConcreteTwo<,>));
+
+			// Assert
+			AssertMapping(mappings, typeof(IGenericInterface<,>), typeof(OpenGenericConcrete<,>));
+			AssertMapping(mappings, typeof(IGenericInterface<,>), typeof(OpenGenericConcreteTwo<,>));
+			Assert.AreEqual(2, mappings.Count());
+		}
+		#endregion
+
+		#region Collection Registration tests
+		[TestMethod]
+		public void CreateMappings_CollectionRegistrationAndMultipleMappings_CreatesCollectionMapping()
+		{
+			// Act
+			var mappings = factory.CreateMappings(MappingBehaviors.CollectionRegistration, AutomapperConfig.Create(),
+												  typeof(IInterface), typeof(InterfaceImplementation), typeof(InterfaceImplementationTwo));
+
+			// Assert
+			AssertMapping<IEnumerable<IInterface>, UnityCollectionFacade<IInterface>>(mappings);
+		}
+
+		[TestMethod]
+		public void CreateMappings_CollectionRegistrationAndSingleMapping_DoesNotCreateCollectionMapping()
+		{
+			// Act
+			var mappings = factory.CreateMappings(MappingBehaviors.CollectionRegistration, AutomapperConfig.Create(),
+												  typeof(IInterface), typeof(InterfaceImplementation));
+
+			// Assert
+			AssertMapping<IEnumerable<IInterface>, UnityCollectionFacade<IInterface>>(mappings, Expectation.ShouldNotExist);
+		}
+
+		[TestMethod]
+		public void CreateMappings_CollectionRegistrationAndMultipleMappingsAcrossManyTimes_DoesNotCreateCollectionMapping()
+		{
+			// Act
+			var mappings = factory.CreateMappings(MappingBehaviors.CollectionRegistration, AutomapperConfig.Create(),
+												  typeof(IInterface), typeof(InterfaceImplementation), typeof(IOther), typeof(OtherImplementation));
+
+			// Assert
+			AssertMapping<IEnumerable<IInterface>, UnityCollectionFacade<IInterface>>(mappings, Expectation.ShouldNotExist);
+			AssertMapping<IEnumerable<IOther>, UnityCollectionFacade<IOther>>(mappings, Expectation.ShouldNotExist);
+		}
+		#endregion
 
 		public enum Expectation
 		{
@@ -157,11 +238,8 @@ namespace Lydian.Unity.Automapper.Test.Core
 			ShouldNotExist = 2
 		}
 
-		private static void AssertMapping<TFrom, TTo>(IEnumerable<TypeMapping> mappings, Expectation expectation = Expectation.ShouldExist)
+		private static void AssertMapping(IEnumerable<TypeMapping> mappings, Type fromType, Type toType, Expectation expectation = Expectation.ShouldExist)
 		{
-			var toType = typeof(TTo);
-			var fromType = typeof(TFrom);
-			
 			var match = mappings.Where(m => m.From == fromType)
 								.Where(m => m.To == toType)
 								.Any();
@@ -170,6 +248,11 @@ namespace Lydian.Unity.Automapper.Test.Core
 				match = !match;
 
 			Assert.IsTrue(match, String.Format("Could not locate mapping from {0} to {1}", fromType.FullName, toType.FullName));
+		}
+
+		private static void AssertMapping<TFrom, TTo>(IEnumerable<TypeMapping> mappings, Expectation expectation = Expectation.ShouldExist)
+		{
+			AssertMapping(mappings, typeof(TFrom), typeof(TTo), expectation);
 		}
 	}
 }
