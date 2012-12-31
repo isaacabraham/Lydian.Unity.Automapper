@@ -10,8 +10,9 @@ namespace Lydian.Unity.Automapper.Core
 	/// <summary>
 	/// Keeps track of registrations that have taken place on a Unity Container.
 	/// </summary>
-	internal sealed class UnityRegistrationTracker : IEqualityComparer<ContainerRegistration>
+	internal sealed class UnityRegistrationTracker
 	{
+		private readonly ExistingMappingComparer existingMappingComparer = new ExistingMappingComparer();
 		private readonly IEnumerable<ContainerRegistration> initialRegistrations;
 		private readonly IUnityContainer target;
 
@@ -45,19 +46,25 @@ namespace Lydian.Unity.Automapper.Core
 		/// <returns>The collection of new registrations.</returns>
 		public IEnumerable<ContainerRegistration> GetNewRegistrations()
 		{
-			return target.Registrations.Except(initialRegistrations, this).ToArray();
+			return target.Registrations.Except(initialRegistrations, existingMappingComparer).ToArray();
 		}
 
-		public Boolean Equals(ContainerRegistration x, ContainerRegistration y)
+		/// <summary>
+		/// Compares Container Registrations based on their RegisteredType and Name. 
+		/// </summary>
+		class ExistingMappingComparer : IEqualityComparer<ContainerRegistration>
 		{
-			return x.MappedToType.Equals(y.MappedToType)
-				&& x.RegisteredType.Equals(y.MappedToType)
-				&& String.Equals(x.Name, y.Name);
-		}
+			public Boolean Equals(ContainerRegistration x, ContainerRegistration y)
+			{
+				return x.RegisteredType.Equals(y.RegisteredType)
+					&& String.Equals(x.Name, y.Name);
+			}
 
-		public Int32 GetHashCode(ContainerRegistration obj)
-		{
-			return (obj.MappedToType.FullName + obj.RegisteredType.FullName + obj.Name).GetHashCode();
+			public Int32 GetHashCode(ContainerRegistration obj)
+			{
+				return String.Format("{0}{1}", obj.RegisteredType.FullName, obj.Name)
+							 .GetHashCode();
+			}
 		}
 	}
 }

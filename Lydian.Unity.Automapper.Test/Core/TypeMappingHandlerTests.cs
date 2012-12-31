@@ -9,6 +9,7 @@ using System.Linq;
 
 namespace Lydian.Unity.Automapper.Test.Core
 {
+
 	[TestClass]
 	public class TypeMappingHandlerTests
 	{
@@ -110,6 +111,38 @@ namespace Lydian.Unity.Automapper.Test.Core
 		public void PerformRegistrations_CreatedARegistration_ReturnsIt()
 		{
 			var realContainer = new UnityContainer();
+
+			// Act
+			var registrations = handler.PerformRegistrations(realContainer, new[] { new TypeMapping(typeof(Object), typeof(String)) });
+
+			// Assert
+			var registration = registrations.Single();
+			Assert.AreEqual(typeof(Object), registration.RegisteredType);
+			Assert.AreEqual(typeof(String), registration.MappedToType);
+		}
+
+		[TestMethod]
+		public void PerformRegistrations_ExistingRegistrationSameSourceDifferentName_DoesNotReturnIt()
+		{
+			var realContainer = new UnityContainer();
+			realContainer.RegisterType<Object, String>("TEST");
+			registrationNameFactory.Setup(f => f.GetRegistrationName(It.IsAny<TypeMapping>())).Returns("TEST2");
+			
+			// Act
+			var registrations = handler.PerformRegistrations(realContainer, new[] { new TypeMapping(typeof(Object), typeof(String)) });
+
+			// Assert
+			var registration = registrations.Single();
+			Assert.AreEqual(typeof(Object), registration.RegisteredType);
+			Assert.AreEqual(typeof(String), registration.MappedToType);
+		}
+
+		[TestMethod]
+		public void PerformRegistrations_ExistingRegistrationDifferentSourceSameName_DoesNotReturnIt()
+		{
+			var realContainer = new UnityContainer();
+			realContainer.RegisterType<String, String>("TEST2");
+			registrationNameFactory.Setup(f => f.GetRegistrationName(It.IsAny<TypeMapping>())).Returns("TEST2");
 
 			// Act
 			var registrations = handler.PerformRegistrations(realContainer, new[] { new TypeMapping(typeof(Object), typeof(String)) });

@@ -31,31 +31,6 @@ namespace Lydian.Unity.Automapper
 		}
 
 		/// <summary>
-		/// Creates an automapper configuration using Attributes on the types to dictate the set of configuration.
-		/// </summary>
-		/// <param name="source"></param>
-		/// <returns></returns>
-		internal static AutomapperConfig Create(IEnumerable<Type> source)
-		{
-			Contract.Requires(source != null, "source is null.");
-
-			var configuration = Create()
-									.AndDoNotMapFor(source.Where(Utils.HasAttribute<DoNotMapAttribute>).ToArray())
-									.AndMapAsSingleton(source.Where(Utils.HasAttribute<SingletonAttribute>).ToArray())
-									.AndUseMultimappingFor(source.Where(Utils.HasAttribute<MultimapAttribute>).ToArray())
-									.AndUsePolicyInjectionFor(source.Where(Utils.HasAttribute<PolicyInjectionAttribute>).ToArray());
-
-			var namedMappings = source
-									.Select(t => Tuple.Create(t, t.GetMapAsName()))
-									.Where(pair => pair.Item2 != null);
-
-			foreach (var namedMapping in namedMappings)
-				configuration.AndUseNamedMappingFor(namedMapping.Item1, namedMapping.Item2);
-
-			return configuration;
-		}
-
-		/// <summary>
 		/// Indicates that the provided types should not participate in automapping.
 		/// </summary>
 		/// <param name="types">The set of types to ignore.</param>
@@ -133,6 +108,30 @@ namespace Lydian.Unity.Automapper
 			singletonTypes.AddRange(config.singletonTypes);
 		}
 
+		/// <summary>
+		/// Creates an automapper configuration using Attributes on the types to dictate the set of configuration.
+		/// </summary>
+		/// <param name="source"></param>
+		/// <returns></returns>
+		internal static AutomapperConfig Create(IEnumerable<Type> source)
+		{
+			Contract.Requires(source != null, "source is null.");
+
+			var configuration = Create()
+									.AndDoNotMapFor(source.Where(Utils.HasAttribute<DoNotMapAttribute>).ToArray())
+									.AndMapAsSingleton(source.Where(Utils.HasAttribute<SingletonAttribute>).ToArray())
+									.AndUseMultimappingFor(source.Where(Utils.HasAttribute<MultimapAttribute>).ToArray())
+									.AndUsePolicyInjectionFor(source.Where(Utils.HasAttribute<PolicyInjectionAttribute>).ToArray());
+
+			var namedMappings = source
+									.Select(t => Tuple.Create(t, t.GetMapAsName()))
+									.Where(pair => pair.Item2 != null);
+
+			foreach (var namedMapping in namedMappings)
+				configuration.AndUseNamedMappingFor(namedMapping.Item1, namedMapping.Item2);
+
+			return configuration;
+		}
 		internal AutomapperConfig MergeWith(AutomapperConfig sourceConfig)
 		{
 			DoMerge(sourceConfig);			

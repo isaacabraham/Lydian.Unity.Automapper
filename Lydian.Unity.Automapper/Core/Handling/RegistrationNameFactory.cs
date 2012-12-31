@@ -25,7 +25,8 @@ namespace Lydian.Unity.Automapper.Core.Handling
 		{
 			var namedMappingRequested = configurationDetails.IsMultimap(typeMapping.From) || configurationDetails.IsNamedMapping(typeMapping.To);
 			var namedMappingRequired = mappingBehaviors.HasFlag(MappingBehaviors.MultimapByDefault) && multimapTypes.Contains(typeMapping.From);
-			return namedMappingRequested || namedMappingRequired ? configurationDetails.GetNamedMapping(typeMapping) : null;
+			return (namedMappingRequested || namedMappingRequired) ? configurationDetails.GetNamedMapping(typeMapping)
+																   : null;
 		}
 	}
 }

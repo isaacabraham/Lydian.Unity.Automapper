@@ -1,4 +1,5 @@
 using Microsoft.Practices.Unity;
+using System;
 using System.Diagnostics.Contracts;
 using System.Linq;
 
@@ -35,7 +36,7 @@ namespace Lydian.Unity.Automapper.Core.Handling
 		{
 			Contract.Assume(target.Registrations != null);
 			var existingRegistration = target.Registrations
-												.FirstOrDefault(r => r.RegisteredType.Equals(mapping.From));
+										     .FirstOrDefault(r => r.RegisteredType.Equals(mapping.From));
 			if (existingRegistration != null)
 				throw new DuplicateMappingException(mapping.From, existingRegistration.MappedToType, mapping.To);
 		}
@@ -46,9 +47,8 @@ namespace Lydian.Unity.Automapper.Core.Handling
 
 			var mappingName = configurationDetails.GetNamedMapping(mapping);
 			var existingRegistration = target.Registrations
-												.Where(r => r.Name != null)
+												.Where(r => String.Equals(r.Name, mappingName))
 												.Where(r => r.RegisteredType.Equals(mapping.From))
-												.Where(r => r.Name.Equals(mappingName))
 												.FirstOrDefault();
 			if (existingRegistration != null)
 				throw new DuplicateMappingException(mapping.From, existingRegistration.MappedToType, mapping.To, mappingName);

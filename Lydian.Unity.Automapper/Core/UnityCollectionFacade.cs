@@ -11,6 +11,7 @@ namespace Lydian.Unity.Automapper.Core
 	internal sealed class UnityCollectionFacade<T> : IEnumerable<T>
 	{
 		private readonly IEnumerable<T> resolvedTypes;
+
 		/// <summary>
 		/// Initializes a new instance of the CollectionFacade class.
 		/// </summary>

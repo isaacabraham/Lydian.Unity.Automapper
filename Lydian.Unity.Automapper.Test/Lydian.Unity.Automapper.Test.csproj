@@ -141,6 +141,10 @@
     </Compile>
     <Compile Include="Core\Handling\ConfigLifetimeManagerFactoryTests.cs" />
     <Compile Include="Core\Handling\InjectionMemberFactoryTests.cs" />
+    <Compile Include="Core\Handling\RegistrationNameFactoryTests.cs" />
+    <Compile Include="Core\Handling\TypeMappingValidatorTests.cs" />
+    <Compile Include="Core\MappingControllerTests.cs" />
+    <Compile Include="Core\UnityCollectionFacadeTests.cs" />
     <Compile Include="TestableUnityConfigProvider.cs" />
     <Compile Include="TestTypes\BasicTypes.cs" />
     <Compile Include="TestTypes\ExamplePolicy.cs" />
