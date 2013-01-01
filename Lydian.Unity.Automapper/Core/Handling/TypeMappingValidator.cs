@@ -34,7 +34,6 @@ namespace Lydian.Unity.Automapper.Core.Handling
 
 		private static void CheckForExistingTypeMapping(IUnityContainer target, TypeMapping mapping)
 		{
-			Contract.Assume(target.Registrations != null);
 			var existingRegistration = target.Registrations
 										     .FirstOrDefault(r => r.RegisteredType.Equals(mapping.From));
 			if (existingRegistration != null)
@@ -43,8 +42,6 @@ namespace Lydian.Unity.Automapper.Core.Handling
 
 		private static void CheckForExistingNamedMapping(IUnityContainer target, TypeMapping mapping, AutomapperConfig configurationDetails)
 		{
-			Contract.Assume(target.Registrations != null);
-
 			var mappingName = configurationDetails.GetNamedMapping(mapping);
 			var existingRegistration = target.Registrations
 												.Where(r => String.Equals(r.Name, mappingName))

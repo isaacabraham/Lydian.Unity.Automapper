@@ -26,7 +26,6 @@ namespace Lydian.Unity.Automapper
 		/// <returns>An empty instance of the configuration.</returns>
 		public static AutomapperConfig Create()
 		{
-			Contract.Ensures(Contract.Result<AutomapperConfig>() != null);
 			return new AutomapperConfig();
 		}
 
@@ -38,7 +37,6 @@ namespace Lydian.Unity.Automapper
 		public AutomapperConfig AndDoNotMapFor(params Type[] types)
 		{
 			Contract.Requires(types != null, "types is null.");
-
 			doNotMapTypes.AddRange(types);
 			return this;
 		}
@@ -49,10 +47,7 @@ namespace Lydian.Unity.Automapper
 		/// <param name="name">The name to use for the mapping.</param>
 		/// <returns></returns>
 		public AutomapperConfig AndUseNamedMappingFor(Type type, String name)
-		{
-			Contract.Requires(type != null, "type is null.");
-			Contract.Requires(!String.IsNullOrEmpty(name), "name is null or empty.");
-			
+		{		
 			explicitNamedMappings.Add(Tuple.Create(type, name));
 			return this;
 		}
@@ -64,7 +59,6 @@ namespace Lydian.Unity.Automapper
 		public AutomapperConfig AndUseMultimappingFor(params Type[] types)
 		{
 			Contract.Requires(types != null, "types is null.");
-
 			multimapTypes.AddRange(types);
 			return this;
 		}
@@ -76,7 +70,6 @@ namespace Lydian.Unity.Automapper
 		public AutomapperConfig AndUsePolicyInjectionFor(params Type[] types)
 		{
 			Contract.Requires(types != null, "types is null.");
-
 			policyInjectionTypes.AddRange(types);
 			return this;
 		}
@@ -88,7 +81,6 @@ namespace Lydian.Unity.Automapper
 		public AutomapperConfig AndMapAsSingleton(params Type[] types)
 		{
 			Contract.Requires(types != null, "types is null.");
-
 			singletonTypes.AddRange(types);
 			return this;
 		}
@@ -115,8 +107,6 @@ namespace Lydian.Unity.Automapper
 		/// <returns></returns>
 		internal static AutomapperConfig Create(IEnumerable<Type> source)
 		{
-			Contract.Requires(source != null, "source is null.");
-
 			var configuration = Create()
 									.AndDoNotMapFor(source.Where(Utils.HasAttribute<DoNotMapAttribute>).ToArray())
 									.AndMapAsSingleton(source.Where(Utils.HasAttribute<SingletonAttribute>).ToArray())
@@ -126,7 +116,6 @@ namespace Lydian.Unity.Automapper
 			var namedMappings = source
 									.Select(t => Tuple.Create(t, t.GetMapAsName()))
 									.Where(pair => pair.Item2 != null);
-
 			foreach (var namedMapping in namedMappings)
 				configuration.AndUseNamedMappingFor(namedMapping.Item1, namedMapping.Item2);
 
@@ -140,7 +129,6 @@ namespace Lydian.Unity.Automapper
 		internal Boolean IsMultimap(Type type)
 		{
 			type = type.IsGenericType ? type.GetGenericTypeDefinition() : type;
-
 			return multimapTypes
 					.Any(t => t == type);
 		}
@@ -150,7 +138,7 @@ namespace Lydian.Unity.Automapper
 		}
 		internal Boolean PolicyInjectionRequired()
 		{
-			 return policyInjectionTypes.Any();
+			return policyInjectionTypes.Any();
 		}
 		internal Boolean IsPolicyInjection(Type type)
 		{

@@ -25,10 +25,6 @@ namespace Lydian.Unity.Automapper.Core
 		/// <param name="internalContainer">The container used internally by the mapper itself. This is NOT the target for registration!</param>
 		public MappingController(IUnityContainer target, ITypeMappingFactory mappingFactory, IUnityContainer internalContainer)
 		{
-			Contract.Requires(target != null);
-			Contract.Requires(mappingFactory != null);
-			Contract.Requires(internalContainer != null);
-
 			this.internalContainer = internalContainer;
 			this.mappingFactory = mappingFactory;
 			this.target = target;
@@ -42,8 +38,6 @@ namespace Lydian.Unity.Automapper.Core
 		/// <param name="behaviors">The behaviors to use to guide auto-mapping.</param>
 		public IEnumerable<ContainerRegistration> RegisterTypes(MappingBehaviors behaviors, params Type[] types)
 		{
-			Contract.Requires(types != null, "types");
-
 			var configurationDetails = GetConfigurationDetails(types);
 			var mappings = mappingFactory.CreateMappings(behaviors, configurationDetails, types);
 
@@ -73,18 +67,9 @@ namespace Lydian.Unity.Automapper.Core
 		/// <param name="behaviors">The behaviors to use to guide auto-mapping.</param>
 		public void RegisterAssemblies(MappingBehaviors behaviors, params String[] assemblyNames)
 		{
-			Contract.Requires(assemblyNames != null);
 			var types = assemblyNames.SelectMany(assemblyName => Assembly.Load(assemblyName).GetTypes())
 									 .ToArray();
 			RegisterTypes(behaviors, types);
-		}
-
-		[SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Code Contracts")]
-		[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Code Contracts")]
-		[ContractInvariantMethod]
-		private void ObjectInvariant()
-		{
-			Contract.Invariant(target != null);
 		}
 	}
 }

@@ -38,6 +38,12 @@ namespace Lydian.Unity.Automapper.Core
 			return mapAsAttribute.MappingName;
 		}
 
+		/// <summary>
+		/// Tests whether the type has at least one instance the attribute specified applied to it.
+		/// </summary>
+		/// <typeparam name="TAttribute">The attribute to search for.</typeparam>
+		/// <param name="type">The type to check.</param>
+		/// <returns>True if the attribute exists; otherwise false.</returns>
 		public static Boolean HasAttribute<TAttribute>(this Type type) where TAttribute : Attribute
 		{
 			return type.GetCustomAttributes(typeof(TAttribute), false).Any();

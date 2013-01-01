@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<RuleSet Name="Isaac's Rules" Description="This rule set contains all rules for the FCS and DataHub stacks. Do not ignore violations of these rules without a good reason." ToolsVersion="11.0">
+<RuleSet Name="Isaac's Rules" Description="This rule set contains all relevant rules. Do not ignore violations of these rules without a good reason." ToolsVersion="11.0">
   <IncludeAll Action="Warning" />
   <Rules AnalyzerId="Microsoft.Analyzers.ManagedCodeAnalysis" RuleNamespace="Microsoft.Rules.Managed">
     <Rule Id="CA1000" Action="Error" />

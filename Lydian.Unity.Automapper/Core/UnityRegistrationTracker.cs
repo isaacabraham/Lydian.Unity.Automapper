@@ -22,24 +22,10 @@ namespace Lydian.Unity.Automapper.Core
 		/// <param name="target">The container to track changes of.</param>
 		public UnityRegistrationTracker(IUnityContainer target)
 		{
-			Contract.Requires(target != null, "target is null.");
-			Contract.Ensures(initialRegistrations != null);
-
 			this.target = target;
-			Contract.Assume(target.Registrations != null);
 			initialRegistrations = target.Registrations.ToArray();
-		}
-		
-		[SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Code Contracts")]
-		[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Code Contracts")]
-		[ContractInvariantMethod]
-		private void ObjectInvariant()
-		{
-			Contract.Invariant(target != null);
-			Contract.Invariant(initialRegistrations != null);
-			Contract.Invariant(target.Registrations != null);
-		}
-		
+		}	
+	
 		/// <summary>
 		/// Gets the list of newly-added registrations since the registration tracker was created.
 		/// </summary>
