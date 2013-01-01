@@ -13,6 +13,7 @@ namespace Lydian.Unity.Automapper.Test.Core.Handling
 	public class TypeMappingValidatorTests
 	{
 		private IUnityContainer target;
+
 		[TestInitialize]
 		public void Setup()
 		{
