@@ -25,6 +25,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lydian.Unity.Automapper.Tes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lydian.Unity.Automapper.Test.TestAssemblyTwo", "Lydian.Unity.Automapper.Test.OtherTestAssembly\Lydian.Unity.Automapper.Test.TestAssemblyTwo.csproj", "{AE0E6BE2-8601-4F1D-99BD-630E50AA443A}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{C9089187-4799-4268-88EC-F675F669560E}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\NuGet.Config = .nuget\NuGet.Config
+		.nuget\NuGet.exe = .nuget\NuGet.exe
+		.nuget\NuGet.targets = .nuget\NuGet.targets
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = Lydian.Unity.Automapper.vsmdi
