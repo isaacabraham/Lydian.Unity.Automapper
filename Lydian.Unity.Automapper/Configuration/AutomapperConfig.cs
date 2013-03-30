@@ -136,11 +136,7 @@ namespace Lydian.Unity.Automapper
 		{
 			return explicitNamedMappings.Any(t => t.Item1 == type);
 		}
-		internal Boolean PolicyInjectionRequired()
-		{
-			return policyInjectionTypes.Any();
-		}
-		internal Boolean IsPolicyInjection(Type type)
+		internal Boolean IsMarkedForPolicyInjection(Type type)
 		{
 			return policyInjectionTypes.Any(t => t == type);
 		}

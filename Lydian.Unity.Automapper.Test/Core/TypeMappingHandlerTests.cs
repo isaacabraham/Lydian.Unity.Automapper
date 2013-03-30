@@ -96,7 +96,7 @@ namespace Lydian.Unity.Automapper.Test.Core
 			var lifetimeManager = new ContainerControlledLifetimeManager();
 			var injectionMembers = new InjectionMember[] { new InterceptionBehavior<PolicyInjectionBehavior>() };
 
-			injectionMemberFactory.Setup(m => m.CreateInjectionMembers(It.IsAny<TypeMapping>())).Returns(injectionMembers);
+			StubCreateInjectionMembers(injectionMembers);
 			registrationNameFactory.Setup(f => f.GetRegistrationName(It.IsAny<TypeMapping>())).Returns("TEST");
 			configLifetimeManagerFactory.Setup(l => l.CreateLifetimeManager(It.IsAny<TypeMapping>())).Returns(lifetimeManager);
 
@@ -151,6 +151,53 @@ namespace Lydian.Unity.Automapper.Test.Core
 			var registration = registrations.Single();
 			Assert.AreEqual(typeof(Object), registration.RegisteredType);
 			Assert.AreEqual(typeof(String), registration.MappedToType);
+		}
+
+		[TestMethod]
+		public void PerformRegistrations_RegistrationCreatedInjectionMembers_AddsPolicyExtension()
+		{
+			var container = new Mock<IUnityContainer>();
+			StubCreateInjectionMembers(new InterceptionBehavior<PolicyInjectionBehavior>());
+
+			// Act
+			var registrations = handler.PerformRegistrations(container.Object, new[] { new TypeMapping(typeof(Object), typeof(String)) });
+
+			// Assert
+			container.Verify(tar => tar.AddExtension(It.IsAny<UnityContainerExtension>()), Times.Once());
+		}
+
+		[TestMethod]
+		public void PerformRegistrations_RegistrationCreatedNoInjectionMembers_DoesNotAddPolicyExtension()
+		{
+			var container = new Mock<IUnityContainer>();
+			StubCreateInjectionMembers();
+
+			// Act
+			var registrations = handler.PerformRegistrations(container.Object, new[] { new TypeMapping(typeof(Object), typeof(String)) });
+
+			// Assert
+			container.Verify(tar => tar.AddExtension(It.IsAny<UnityContainerExtension>()), Times.Never());
+		}
+
+		[TestMethod]
+		public void PerformRegistrations_MultipleRegistrationsWithInjectionMembers_OnlyAddsPolicyExtensionOnce()
+		{
+			var container = new Mock<IUnityContainer>();
+			StubCreateInjectionMembers(new InterceptionBehavior<PolicyInjectionBehavior>());
+
+			// Act
+			var registrations = handler.PerformRegistrations(container.Object, new[] { new TypeMapping(typeof(Object), typeof(String)), new TypeMapping(typeof(Object), typeof(String)) });
+
+			// Assert
+			container.Verify(tar => tar.AddExtension(It.IsAny<UnityContainerExtension>()), Times.Once());
+		}
+
+
+
+		private void StubCreateInjectionMembers(params InjectionMember[] members)
+		{
+			injectionMemberFactory.Setup(m => m.CreateInjectionMembers(It.IsAny<TypeMapping>()))
+											  .Returns(members);
 		}
 	}
 }

@@ -104,7 +104,7 @@ namespace Lydian.Unity.Automapper.Test.Core
 			controller.RegisterTypes(MappingBehaviors.None, types);
 
 			// Assert
-			mappingFactory.Verify(mf => mf.CreateMappings(MappingBehaviors.None, It.Is<AutomapperConfig>(ac => ac.IsPolicyInjection(typeof(String))), types));
+			mappingFactory.Verify(mf => mf.CreateMappings(MappingBehaviors.None, It.Is<AutomapperConfig>(ac => ac.IsMarkedForPolicyInjection(typeof(String))), types));
 		}
 		#endregion
 
@@ -154,7 +154,7 @@ namespace Lydian.Unity.Automapper.Test.Core
 			controller.RegisterTypes(MappingBehaviors.None, types);
 
 			// Assert
-			mappingFactory.Verify(mf => mf.CreateMappings(MappingBehaviors.None, It.Is<AutomapperConfig>(ac => ac.IsPolicyInjection(typeof(IPolicyInjection))), types));
+			mappingFactory.Verify(mf => mf.CreateMappings(MappingBehaviors.None, It.Is<AutomapperConfig>(ac => ac.IsMarkedForPolicyInjection(typeof(IPolicyInjection))), types));
 		}
 
 		[TestMethod]

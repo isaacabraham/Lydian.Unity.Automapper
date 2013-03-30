@@ -1,7 +1,10 @@
 using Lydian.Unity.Automapper.Core.Handling;
 using Microsoft.Practices.Unity;
+using Microsoft.Practices.Unity.InterceptionExtension;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 namespace Lydian.Unity.Automapper.Core
 {
@@ -24,7 +27,7 @@ namespace Lydian.Unity.Automapper.Core
 		public IEnumerable<ContainerRegistration> PerformRegistrations(IUnityContainer target, IEnumerable<TypeMapping> typeMappings)
 		{
 			var changeTracker = new UnityRegistrationTracker(target);
-
+			var extensionSetter = new PolicyExtensionSetter(target);
 			foreach (var typeMapping in typeMappings)
 			{
 				mappingValidator.ValidateTypeMapping(typeMapping);
@@ -34,9 +37,30 @@ namespace Lydian.Unity.Automapper.Core
 				var registrationName = nameFactory.GetRegistrationName(typeMapping);
 
 				target.RegisterType(typeMapping.From, typeMapping.To, registrationName, lifetimeManager, injectionMembers);
+				extensionSetter.CheckIfExtensionIfRequired(injectionMembers);
 			}
 
 			return changeTracker.GetNewRegistrations();
+		}
+
+		class PolicyExtensionSetter
+		{
+			private Boolean alreadyAdded = false;
+			private readonly IUnityContainer container;
+
+			public PolicyExtensionSetter(IUnityContainer container)
+			{
+				this.container = container;
+			}
+
+			public void CheckIfExtensionIfRequired(IEnumerable<InjectionMember> members)
+			{
+				if (alreadyAdded || !members.Any())
+					return;
+
+				container.AddNewExtension<Interception>();
+				alreadyAdded = true;
+			}
 		}
 	}
 }

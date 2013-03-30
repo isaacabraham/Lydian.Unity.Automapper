@@ -12,58 +12,128 @@ namespace Lydian.Unity.Automapper.Test.Core.Handling
 	[TestClass]
 	public class InjectionMemberFactoryTests
 	{
-		private Mock<IUnityContainer> target;
-
-		[TestInitialize]
-		public void Setup()
-		{
-			target = new Mock<IUnityContainer>();
-		}
-
-		[TestMethod]
-		public void Ctor_NoPolicyInjectionTypes_DoesNotAddExtension()
-		{
-			// Act
-			new InjectionMemberFactory(AutomapperConfig.Create(), target.Object);
-
-			// Assert
-			target.Verify(tar => tar.AddExtension(It.IsAny<UnityContainerExtension>()), Times.Never());
-		}
-
-		[TestMethod]
-		public void Ctor_SomePolicyInjectionTypes_AddsExtension()
-		{
-			// Act
-			new InjectionMemberFactory(AutomapperConfig.Create().AndUsePolicyInjectionFor(typeof(String)), target.Object);
-
-			// Assert
-			target.Verify(tar => tar.AddExtension(It.IsAny<UnityContainerExtension>()), Times.Once());
-		}
-
 		[TestMethod]
 		public void CreateInjectionMembers_TypeIsPolicyInjected_ReturnsInjectionMembers()
 		{
-			var factory = new InjectionMemberFactory(AutomapperConfig.Create().AndUsePolicyInjectionFor(typeof(String)), target.Object);
+			var factory = new InjectionMemberFactory(AutomapperConfig.Create().AndUsePolicyInjectionFor(typeof(String)));
 
 			// Act
 			var members = factory.CreateInjectionMembers(new TypeMapping(typeof(String), typeof(String)));
 
 			// Assert
-			Assert.IsInstanceOfType(members.First(), typeof(Interceptor<InterfaceInterceptor>));
-			Assert.IsInstanceOfType(members.Last(), typeof(InterceptionBehavior<PolicyInjectionBehavior>));
-			Assert.AreEqual(2, members.Count());
+			AssertHasInjectionMembers(members);
 		}
 
 		[TestMethod]
 		public void CreateInjectionMembers_TypeIsNotPolicyInjected_ReturnsEmptyCollection()
 		{
-			var factory = new InjectionMemberFactory(AutomapperConfig.Create(), target.Object);
+			var factory = new InjectionMemberFactory(AutomapperConfig.Create());
 
 			// Act
 			var members = factory.CreateInjectionMembers(new TypeMapping(typeof(String), typeof(String)));
 
 			// Assert
 			Assert.IsFalse(members.Any());
+		}
+
+		[TestMethod]
+		public void CreateInjectionMembers_FromTypeHasCallHandlerAttribute_ReturnsInjectionMembers()
+		{
+			var factory = new InjectionMemberFactory(AutomapperConfig.Create());
+
+			// Act
+			var members = factory.CreateInjectionMembers(new TypeMapping(typeof(SampleInterface), typeof(SampleImplementer)));
+
+			// Assert
+			AssertHasInjectionMembers(members);
+		}
+
+		[TestMethod]
+		public void CreateInjectionMembers_FromTypeMethodHasCallHandlerAttribute_ReturnsInjectionMembers()
+		{
+			var factory = new InjectionMemberFactory(AutomapperConfig.Create());
+
+			// Act
+			var members = factory.CreateInjectionMembers(new TypeMapping(typeof(OtherInterface), typeof(SampleImplementer)));
+
+			// Assert
+			AssertHasInjectionMembers(members);
+		}
+
+		[TestMethod]
+		public void CreateInjectionMembers_ToTypeHasCallHandlerAttribute_ReturnsInjectionMembers()
+		{
+			var factory = new InjectionMemberFactory(AutomapperConfig.Create());
+
+			// Act
+			var members = factory.CreateInjectionMembers(new TypeMapping(typeof(EmptyInterface), typeof(EmptyInterfaceAttributeOnType)));
+
+			// Assert
+			AssertHasInjectionMembers(members);
+		}
+
+		[TestMethod]
+		public void CreateInjectionMembers_ToTypeMethodHasCallHandlerAttribute_ReturnsInjectionMembers()
+		{
+			var factory = new InjectionMemberFactory(AutomapperConfig.Create());
+
+			// Act
+			var members = factory.CreateInjectionMembers(new TypeMapping(typeof(EmptyInterface), typeof(EmptyInterfaceAttributeOnMethod)));
+
+			// Assert
+			AssertHasInjectionMembers(members);
+		}
+
+		private static void AssertHasInjectionMembers(InjectionMember[] members)
+		{
+			Assert.IsInstanceOfType(members.First(), typeof(Interceptor<InterfaceInterceptor>));
+			Assert.IsInstanceOfType(members.Last(), typeof(InterceptionBehavior<PolicyInjectionBehavior>));
+			Assert.AreEqual(2, members.Count());
+		}
+
+		[SampleHandler]
+		public interface SampleInterface
+		{
+			void Foo();
+		}
+		public interface OtherInterface
+		{
+			[SampleHandler]
+			void Foo();
+		}
+		public class SampleImplementer : SampleInterface, OtherInterface
+		{
+			public void Foo()
+			{
+				throw new NotImplementedException();
+			}
+		}
+		public class SampleHandlerAttribute : HandlerAttribute
+		{
+			public override ICallHandler CreateHandler(IUnityContainer container)
+			{
+				return new Mock<ICallHandler> { DefaultValue = DefaultValue.Mock }.Object;
+			}
+		}
+		public interface EmptyInterface
+		{
+			void Foo();
+		}
+		[SampleHandler]
+		public class EmptyInterfaceAttributeOnType : EmptyInterface
+		{
+			public void Foo()
+			{
+				throw new NotImplementedException();
+			}
+		}
+		public class EmptyInterfaceAttributeOnMethod : EmptyInterface
+		{
+			[SampleHandler]
+			public void Foo()
+			{
+				throw new NotImplementedException();
+			}
 		}
 	}
 }

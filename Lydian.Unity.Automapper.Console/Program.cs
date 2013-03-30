@@ -42,7 +42,6 @@ namespace ConsoleApplication1
 	[MapAs("Test")]
 	public class NamedConcrete : INamedInterface { }
 
-	[PolicyInjection]
 	public interface IPolicyMapping { void Foo(String testValue = null); }
 	public class PolicyMappingConcrete : IPolicyMapping
 	{
