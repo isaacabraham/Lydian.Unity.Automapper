@@ -20,7 +20,7 @@ namespace Lydian.Unity.Automapper.Core.Handling
 			var requiresPolicyInjection = configurationDetails.IsMarkedForPolicyInjection(typeMapping.From)
 									   || TypeHasHandlerAttribute(typeMapping.From)
 									   || TypeHasHandlerAttribute(typeMapping.To);
-			
+
 			return requiresPolicyInjection ? new InjectionMember[] { new Interceptor<InterfaceInterceptor>(), new InterceptionBehavior<PolicyInjectionBehavior>() }
 									       : new InjectionMember[0];
 		}
