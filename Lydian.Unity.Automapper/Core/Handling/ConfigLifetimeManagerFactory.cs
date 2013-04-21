@@ -13,8 +13,8 @@ namespace Lydian.Unity.Automapper.Core.Handling
 
 		public LifetimeManager CreateLifetimeManager(TypeMapping typeMapping)
 		{
-			return configurationDetails.IsSingleton(typeMapping.From) ? (LifetimeManager)new ContainerControlledLifetimeManager()
-																	  : new TransientLifetimeManager();
+            var customLifetimeManager = configurationDetails.IsMarkedWithCustomLifetimeManager(typeMapping.From);
+            return customLifetimeManager.Item1 ? customLifetimeManager.Item2 : new TransientLifetimeManager();
 		}
 	}
 }

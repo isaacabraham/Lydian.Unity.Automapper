@@ -1,4 +1,6 @@
 using Lydian.Unity.Automapper.Core;
+using Microsoft.Practices.ObjectBuilder2;
+using Microsoft.Practices.Unity;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -16,7 +18,7 @@ namespace Lydian.Unity.Automapper
 		private readonly List<Tuple<Type, String>> explicitNamedMappings = new List<Tuple<Type, String>>();
 		private readonly List<Type> multimapTypes = new List<Type>();
 		private readonly List<Type> policyInjectionTypes = new List<Type>();
-		private readonly List<Type> singletonTypes = new List<Type>();
+		private readonly List<Tuple<Type, Type>> customLifetimeManagerTypes = new List<Tuple<Type, Type>>();
 
 		private AutomapperConfig() { }
 
@@ -80,10 +82,19 @@ namespace Lydian.Unity.Automapper
 		/// <returns></returns>
 		public AutomapperConfig AndMapAsSingleton(params Type[] types)
 		{
-			Contract.Requires(types != null, "types is null.");
-			singletonTypes.AddRange(types);
-			return this;
+            return AndMapWithLifetimeManager<ContainerControlledLifetimeManager>(types);
 		}
+        /// <summary>
+        /// Indicates that the specified types should be registered using the specified lifetime manager.
+        /// </summary>
+        /// <param name="types">The set of types to register.</param>
+        /// <returns></returns>
+        public AutomapperConfig AndMapWithLifetimeManager<LifetimePolicy>(params Type[] types) where LifetimePolicy : LifetimeManager
+        {           
+            Contract.Requires(types != null, "types is null.");
+            customLifetimeManagerTypes.AddRange(types.Select(type => Tuple.Create(type, typeof(LifetimePolicy))).ToArray());
+            return this;
+        }
 
 		private void DoMerge(AutomapperConfig config)
 		{
@@ -91,13 +102,13 @@ namespace Lydian.Unity.Automapper
 			Contract.Requires(config.explicitNamedMappings != null);
 			Contract.Requires(config.multimapTypes != null);
 			Contract.Requires(config.policyInjectionTypes != null);
-			Contract.Requires(config.singletonTypes != null);
+			Contract.Requires(config.customLifetimeManagerTypes != null);
 
 			doNotMapTypes.AddRange(config.doNotMapTypes);
 			explicitNamedMappings.AddRange(config.explicitNamedMappings);
 			multimapTypes.AddRange(config.multimapTypes);
 			policyInjectionTypes.AddRange(config.policyInjectionTypes);
-			singletonTypes.AddRange(config.singletonTypes);
+			customLifetimeManagerTypes.AddRange(config.customLifetimeManagerTypes);
 		}
 
 		/// <summary>
@@ -140,10 +151,17 @@ namespace Lydian.Unity.Automapper
 		{
 			return policyInjectionTypes.Any(t => t == type);
 		}
-		internal Boolean IsSingleton(Type type)
+		internal Tuple<Boolean, LifetimeManager> IsMarkedWithCustomLifetimeManager(Type type)
 		{
-			return singletonTypes.Any(t => t == type);
-		}
+            var customLifetimeManager = customLifetimeManagerTypes.Where(t => t.Item1 == type)
+                                                                  .Select(t => t.Item2)
+                                                                  .FirstOrDefault();
+
+            if (customLifetimeManager == null)
+                return Tuple.Create<Boolean, LifetimeManager>(false, null);
+
+            return Tuple.Create(true, (LifetimeManager)Activator.CreateInstance(customLifetimeManager));
+        }
 		internal Boolean IsMappable(Type type)
 		{
 			return !doNotMapTypes.Any(t => t == type);
@@ -167,7 +185,7 @@ namespace Lydian.Unity.Automapper
 		private void Assumptions()
 		{
 			Contract.Invariant(policyInjectionTypes != null);
-			Contract.Invariant(singletonTypes != null);
+			Contract.Invariant(customLifetimeManagerTypes != null);
 			Contract.Invariant(doNotMapTypes != null);
 			Contract.Invariant(explicitNamedMappings != null);
 			Contract.Invariant(multimapTypes != null);

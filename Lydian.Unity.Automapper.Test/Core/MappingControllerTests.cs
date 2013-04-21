@@ -52,7 +52,7 @@ namespace Lydian.Unity.Automapper.Test.Core
 			controller.RegisterTypes(MappingBehaviors.None, types);
 
 			// Assert
-			mappingFactory.Verify(mf => mf.CreateMappings(MappingBehaviors.None, It.Is<AutomapperConfig>(ac => ac.IsSingleton(typeof(String))), types));
+			mappingFactory.Verify(mf => mf.CreateMappings(MappingBehaviors.None, It.Is<AutomapperConfig>(ac => ac.IsMarkedWithCustomLifetimeManager(typeof(String)).Item1), types));
 		}
 
 		[TestMethod]
@@ -118,7 +118,7 @@ namespace Lydian.Unity.Automapper.Test.Core
 			controller.RegisterTypes(MappingBehaviors.None, types);
 
 			// Assert
-			mappingFactory.Verify(mf => mf.CreateMappings(MappingBehaviors.None, It.Is<AutomapperConfig>(ac => (!ac.IsMappable(typeof(Int32)) && ac.IsSingleton(typeof(ISingleton)))), types));
+			mappingFactory.Verify(mf => mf.CreateMappings(MappingBehaviors.None, It.Is<AutomapperConfig>(ac => (!ac.IsMappable(typeof(Int32)) && ac.IsMarkedWithCustomLifetimeManager(typeof(ISingleton)).Item1)), types));
 		}
 
 		[TestMethod]
@@ -180,7 +180,7 @@ namespace Lydian.Unity.Automapper.Test.Core
 			controller.RegisterTypes(MappingBehaviors.None, types);
 
 			// Assert
-			mappingFactory.Verify(mf => mf.CreateMappings(MappingBehaviors.None, It.Is<AutomapperConfig>(ac => (!ac.IsMappable(typeof(Int32)) && ac.IsSingleton(typeof(String)))), types));
+			mappingFactory.Verify(mf => mf.CreateMappings(MappingBehaviors.None, It.Is<AutomapperConfig>(ac => (!ac.IsMappable(typeof(Int32)) && ac.IsMarkedWithCustomLifetimeManager(typeof(String)).Item1)), types));
 		}
 
 		[TestMethod]

@@ -232,7 +232,7 @@ namespace Lydian.Unity.Automapper.Test.Core
 		}
 		#endregion
 
-		public enum Expectation
+		internal enum Expectation
 		{
 			ShouldExist = 1,
 			ShouldNotExist = 2
