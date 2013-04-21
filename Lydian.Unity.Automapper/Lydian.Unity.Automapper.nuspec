@@ -11,8 +11,8 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <summary>An easy-to-use auto-mapper for Unity.</summary>
     <description>$description$</description>
-    <releaseNotes>[PolicyInjection] is now optional for types that have a HandleAttribute on them.</releaseNotes>
-    <copyright>Copyright 2012</copyright>
+    <releaseNotes>[PolicyInjection] is now optional for types that have a HandlerAttribute on them.</releaseNotes>
+    <copyright>Copyright 2012-2013</copyright>
    <tags>Unity container Auto registration Autoregistration dependency injection IoC DI inversion</tags>
   </metadata>
 </package>
