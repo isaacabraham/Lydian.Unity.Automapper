@@ -4,6 +4,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 
 namespace Lydian.Unity.Automapper.Test.Core
 {
@@ -118,7 +119,8 @@ namespace Lydian.Unity.Automapper.Test.Core
 			controller.RegisterTypes(MappingBehaviors.None, types);
 
 			// Assert
-			mappingFactory.Verify(mf => mf.CreateMappings(MappingBehaviors.None, It.Is<AutomapperConfig>(ac => (!ac.IsMappable(typeof(Int32)) && ac.IsMarkedWithCustomLifetimeManager(typeof(ISingleton)).Item1)), types));
+			mappingFactory.Verify(mf => mf.CreateMappings(MappingBehaviors.None, It.Is<AutomapperConfig>(ac => !ac.IsMappable(typeof(Int32))), types));
+            mappingFactory.Verify(mf => mf.CreateMappings(MappingBehaviors.None, It.Is<AutomapperConfig>(CreateLifetimeManagerCheck<ISingleton, ContainerControlledLifetimeManager>()), types));
 		}
 
 		[TestMethod]
@@ -168,7 +170,75 @@ namespace Lydian.Unity.Automapper.Test.Core
 			// Assert
 			mappingFactory.Verify(mf => mf.CreateMappings(MappingBehaviors.None, It.Is<AutomapperConfig>(ac => ac.IsNamedMapping(typeof(INamedMapping))), types));
 		}
-#endregion
+
+        [TestMethod]
+        public void RegisterTypes_SuppliedTypeHasCustomLifetimeManagerSpecified_MergedIntoOutput()
+        {
+            var types = new[] { typeof(ICustomLifetimeManager) };
+
+            // Act
+            controller.RegisterTypes(MappingBehaviors.None, types);
+
+            // Assert
+            mappingFactory.Verify(mf => mf.CreateMappings(MappingBehaviors.None, It.Is<AutomapperConfig>(CreateLifetimeManagerCheck<ICustomLifetimeManager, HierarchicalLifetimeManager>()), types));
+        }
+
+        [TestMethod]
+        public void RegisterTypes_ManyTypesWithSameCustomLifetimeManager_MergedIntoOutput()
+        {
+            var types = new[] { typeof(ICustomLifetimeManager), typeof(IOtherCustomLifetimeManager) };
+
+            // Act
+            controller.RegisterTypes(MappingBehaviors.None, types);
+
+            // Assert
+            mappingFactory.Verify(mf => mf.CreateMappings(MappingBehaviors.None, It.Is<AutomapperConfig>(CreateLifetimeManagerCheck<ICustomLifetimeManager, HierarchicalLifetimeManager>()), types));
+            mappingFactory.Verify(mf => mf.CreateMappings(MappingBehaviors.None, It.Is<AutomapperConfig>(CreateLifetimeManagerCheck<IOtherCustomLifetimeManager, HierarchicalLifetimeManager>()), types));
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void RegisterTypes_SingletonAndCustomLifetimeManagerSpecified_ThrowsException()
+        {
+            try
+            {
+                var types = new[] { typeof(IMultipleLifetimeManagers) };
+
+                // Act
+                controller.RegisterTypes(MappingBehaviors.None, types);
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Assert
+                Assert.AreEqual("The type IMultipleLifetimeManagers has multiple lifetime managers specified.", ex.Message);
+                throw;
+            }
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void RegisterTypes_CustomLifetimeManagerThatIsNotALifetimeManagerSpecified_ThrowsException()
+        {
+            try
+            {
+                var types = new[] { typeof(IInvalidLifetimeManager) };
+
+                // Act
+                controller.RegisterTypes(MappingBehaviors.None, types);
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Assert
+                Assert.AreEqual("The type IInvalidLifetimeManager has been marked with the type System.String as a Lifetime Manager; lifetime managers must derive from LifetimeManager.", ex.Message);
+                throw;
+            }
+        }
+
+        private Expression<Func<AutomapperConfig, Boolean>> CreateLifetimeManagerCheck<TType, TLifetimeManager>() where TLifetimeManager : LifetimeManager
+        {
+            return ac => ac.IsMarkedWithCustomLifetimeManager(typeof(TType)).Item1 && ac.IsMarkedWithCustomLifetimeManager(typeof(TType)).Item2 is TLifetimeManager;
+        }
+        #endregion
 
 		[TestMethod]
 		public void RegisterTypes_ManyConfigurationsFound_ConfigurationsMergedIntoOutput()
@@ -228,6 +298,11 @@ namespace Lydian.Unity.Automapper.Test.Core
 		[DoNotMap]		  public interface IDoNotMap { }
 		[Multimap]		  public interface IMultiMap { }
 		[PolicyInjection] public interface IPolicyInjection { }
+        [CustomLifetimeManager(typeof(HierarchicalLifetimeManager))] public interface ICustomLifetimeManager { }
+        [CustomLifetimeManager(typeof(HierarchicalLifetimeManager))] public interface IOtherCustomLifetimeManager { }
+        [Singleton]
+        [CustomLifetimeManager(typeof(HierarchicalLifetimeManager))] public interface IMultipleLifetimeManagers { }
+        [CustomLifetimeManager(typeof(String))] public interface IInvalidLifetimeManager { } 
 		[MapAs("Foo")]	  public class INamedMapping { }
 
 		public class SecondaryConfigProvider : IAutomapperConfigProvider

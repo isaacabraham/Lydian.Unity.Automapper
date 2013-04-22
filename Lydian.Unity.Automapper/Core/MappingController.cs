@@ -57,7 +57,7 @@ namespace Lydian.Unity.Automapper.Core
 					.Select(providerType => (IAutomapperConfigProvider)Activator.CreateInstance(providerType))
 					.Cast<IAutomapperConfigProvider>()
 					.Select(provider => provider.CreateConfiguration())
-					.Aggregate(AutomapperConfig.Create(types), (accumulator, config) => accumulator.MergeWith(config));
+					.Aggregate(AutomapperConfig.CreateFromAttributes(types), (accumulator, config) => accumulator.MergeWith(config));
 		}
 
 		/// <summary>

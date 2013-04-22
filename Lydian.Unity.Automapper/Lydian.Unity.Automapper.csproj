@@ -251,6 +251,7 @@
     <Compile Include="..\SharedAssemblyInfo.cs">
       <Link>SharedAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Configuration\CustomLifetimeManagerAttribute.cs" />
     <Compile Include="Configuration\DoNotMapAttribute.cs" />
     <CodeAnalysisDictionary Include="CustomDictionary.xml">
       <SubType>Designer</SubType>
