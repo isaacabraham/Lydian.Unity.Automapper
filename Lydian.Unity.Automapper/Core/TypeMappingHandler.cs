@@ -37,7 +37,7 @@ namespace Lydian.Unity.Automapper.Core
 				var registrationName = nameFactory.GetRegistrationName(typeMapping);
 
 				target.RegisterType(typeMapping.From, typeMapping.To, registrationName, lifetimeManager, injectionMembers);
-				extensionSetter.CheckIfExtensionIfRequired(injectionMembers);
+				extensionSetter.CheckIfInterceptionExtensionIsRequired(injectionMembers);
 			}
 
 			return changeTracker.GetNewRegistrations();
@@ -53,7 +53,7 @@ namespace Lydian.Unity.Automapper.Core
 				this.container = container;
 			}
 
-			public void CheckIfExtensionIfRequired(IEnumerable<InjectionMember> members)
+			public void CheckIfInterceptionExtensionIsRequired(IEnumerable<InjectionMember> members)
 			{
 				if (alreadyAdded || !members.Any())
 					return;

@@ -6,44 +6,44 @@ using System.Collections;
 
 namespace Lydian.Unity.Automapper.Test.Core.Handling
 {
-	[TestClass]
-	public class ConfigLifetimeManagerFactoryTests
-	{
-		[TestMethod]
-		public void CreateLifetimeManager_MappingIsNotASingleton_ReturnsTranscientLifetimeManager()
-		{
-			var factory = new ConfigLifetimeManagerFactory(AutomapperConfig.Create());
+    [TestClass]
+    public class ConfigLifetimeManagerFactoryTests
+    {
+        [TestMethod]
+        public void CreateLifetimeManager_MappingIsNotASingleton_ReturnsTranscientLifetimeManager()
+        {
+            var factory = new ConfigLifetimeManagerFactory(AutomapperConfig.Create());
 
-			// Act
-			var lifetimeManager = factory.CreateLifetimeManager(new TypeMapping(typeof(IEnumerable), typeof(ArrayList)));
+            // Act
+            var lifetimeManager = factory.CreateLifetimeManager(new TypeMapping(typeof(IEnumerable), typeof(ArrayList)));
 
-			// Assert
-			Assert.IsInstanceOfType(lifetimeManager, typeof(TransientLifetimeManager));
-		}
+            // Assert
+            Assert.IsInstanceOfType(lifetimeManager, typeof(TransientLifetimeManager));
+        }
 
-		[TestMethod]
-		public void CreateLifetimeManager_InterfaceIsASingleton_ReturnsContainerControlledLifetimeManager()
-		{
-			var factory = new ConfigLifetimeManagerFactory(AutomapperConfig.Create().AndMapAsSingleton(typeof(IEnumerable)));
+        [TestMethod]
+        public void CreateLifetimeManager_InterfaceIsASingleton_ReturnsContainerControlledLifetimeManager()
+        {
+            var factory = new ConfigLifetimeManagerFactory(AutomapperConfig.Create().AndMapAsSingleton(typeof(IEnumerable)));
 
-			// Act
-			var lifetimeManager = factory.CreateLifetimeManager(new TypeMapping(typeof(IEnumerable), typeof(ArrayList)));
+            // Act
+            var lifetimeManager = factory.CreateLifetimeManager(new TypeMapping(typeof(IEnumerable), typeof(ArrayList)));
 
-			// Assert
-			Assert.IsInstanceOfType(lifetimeManager, typeof(ContainerControlledLifetimeManager));
-		}
+            // Assert
+            Assert.IsInstanceOfType(lifetimeManager, typeof(ContainerControlledLifetimeManager));
+        }
 
-		[TestMethod]
-		public void CreateLifetimeManager_ImplementationIsASingleton_ReturnsTransientLifetimeManager()
-		{
-			var factory = new ConfigLifetimeManagerFactory(AutomapperConfig.Create().AndMapAsSingleton(typeof(ArrayList)));
+        [TestMethod]
+        public void CreateLifetimeManager_ImplementationIsASingleton_ReturnsTransientLifetimeManager()
+        {
+            var factory = new ConfigLifetimeManagerFactory(AutomapperConfig.Create().AndMapAsSingleton(typeof(ArrayList)));
 
-			// Act
-			var lifetimeManager = factory.CreateLifetimeManager(new TypeMapping(typeof(IEnumerable), typeof(ArrayList)));
+            // Act
+            var lifetimeManager = factory.CreateLifetimeManager(new TypeMapping(typeof(IEnumerable), typeof(ArrayList)));
 
-			// Assert
-			Assert.IsInstanceOfType(lifetimeManager, typeof(TransientLifetimeManager));
-		}
+            // Assert
+            Assert.IsInstanceOfType(lifetimeManager, typeof(TransientLifetimeManager));
+        }
 
         [TestMethod]
         public void CreateLifetimeManager_InterfaceHasCustomLifetimeManager_ReturnsIt()
@@ -56,5 +56,5 @@ namespace Lydian.Unity.Automapper.Test.Core.Handling
             // Assert
             Assert.IsInstanceOfType(lifetimeManager, typeof(HierarchicalLifetimeManager));
         }
-	}
+    }
 }

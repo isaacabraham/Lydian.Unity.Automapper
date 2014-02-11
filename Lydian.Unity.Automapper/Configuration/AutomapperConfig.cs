@@ -88,7 +88,8 @@ namespace Lydian.Unity.Automapper
         /// </summary>
         /// <param name="types">The set of types to register.</param>
         /// <returns></returns>
-        public AutomapperConfig AndMapWithLifetimeManager<LifetimePolicy>(params Type[] types) where LifetimePolicy : LifetimeManager
+        [SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter")]
+        public AutomapperConfig AndMapWithLifetimeManager<TLifetimePolicy>(params Type[] types) where TLifetimePolicy : LifetimeManager
         {
             Contract.Requires(types != null, "types is null.");
 
@@ -96,7 +97,7 @@ namespace Lydian.Unity.Automapper
             if (duplicateLifetimeManager != null)
                 throw new InvalidOperationException(String.Format("The type {0} has multiple lifetime managers specified.", duplicateLifetimeManager.Name));
 
-            customLifetimeManagerTypes.AddRange(types.Select(type => Tuple.Create(type, typeof(LifetimePolicy))).ToArray());
+            customLifetimeManagerTypes.AddRange(types.Select(type => Tuple.Create(type, typeof(TLifetimePolicy))).ToArray());
             return this;
         }
 
@@ -170,8 +171,7 @@ namespace Lydian.Unity.Automapper
         internal Boolean IsMultimap(Type type)
         {
             type = type.IsGenericType ? type.GetGenericTypeDefinition() : type;
-            return multimapTypes
-                    .Any(t => t == type);
+            return multimapTypes.Any(t => t == type);
         }
         internal Boolean IsNamedMapping(Type type)
         {
