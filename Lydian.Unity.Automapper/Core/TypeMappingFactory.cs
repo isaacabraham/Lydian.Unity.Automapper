@@ -23,17 +23,17 @@ namespace Lydian.Unity.Automapper.Core
 			if (!behaviors.HasFlag(MappingBehaviors.CollectionRegistration))
 				return results.ToArray();
 
-			return CreateMultimapCollections(results)
+			return CreateAcrMappings(results, configurationDetails)
 							.Union(results)
 							.ToArray();
 		}
 
-		private static IEnumerable<TypeMapping> CreateMultimapCollections(IEnumerable<TypeMapping> mappings)
+		private static IEnumerable<TypeMapping> CreateAcrMappings(IEnumerable<TypeMapping> mappings, AutomapperConfig configurationDetails)
 		{
 			Contract.Requires(mappings != null);
 			return mappings
 					.GroupBy(m => m.From)
-					.Where(g => g.Count() > 1)
+					.Where(g => g.Count() > 1 || configurationDetails.IsMultimap(g.Key))
 					.Select(g => new TypeMapping(GetGenericTypeSafely(typeof(IEnumerable<>), g.Key), GetGenericTypeSafely(typeof(UnityCollectionFacade<>), g.Key)));
 		}
 

@@ -1,4 +1,5 @@
-﻿using ConfigProviderAssembly;
+﻿using System.Linq;
+using ConfigProviderAssembly;
 using Lydian.Disposable;
 using Lydian.Disposable.Switches;
 using Lydian.Unity.Automapper;
@@ -109,7 +110,13 @@ namespace ConsoleApplication1
                 TestRegistration<IMyGenericClass<String, Int32>>(container, "First closed generic mapping");
                 TestRegistration<IMyGenericClass<Boolean, Object>>(container, "Second closed generic mapping");
                 TestRegistration<IMultimap>(container, "Multiple mappings", false);
+                if (behaviors.HasFlag(MappingBehaviors.CollectionRegistration))
+                    TestRegistration<IEnumerable<IMultimap>>(container, "Multiple mappings ACR");
+
                 TestRegistration<ISingleMultimap>(container, "Single-instance multimaps", singleMapping: false);
+                if (behaviors.HasFlag(MappingBehaviors.CollectionRegistration))
+                    TestRegistration<IEnumerable<ISingleMultimap>>(container, "Single-instance mappings ACR");
+
                 TestRegistration<INamedInterface>(container, "Named mapping", mappingName: "Test");
 
                 TestRegistration<SingletonInterface>(container, "Provider-based singleton mapping");
@@ -135,6 +142,8 @@ namespace ConsoleApplication1
                 else
                 {
                     var concretes = container.ResolveAll<TInterface>();
+                    if (!concretes.Any())
+                        throw new Exception(String.Format("Could not locate any instances of {0}", typeof(TInterface).Name));
                     foreach (var concrete in concretes)
                         Console.WriteLine("\tResolved from {0} to {1}", typeof(TInterface).ToString(), concrete.GetType().ToString());
                 }
