@@ -83,6 +83,7 @@
     <Compile Include="TypeMappingFactoryTests.fs" />
     <None Include="app.config" />
     <Compile Include="MappingController.fs" />
+    <Compile Include="Attributes.fs" />
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

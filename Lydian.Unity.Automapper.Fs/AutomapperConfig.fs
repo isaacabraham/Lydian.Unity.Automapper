@@ -29,8 +29,8 @@ type internal AutomapperConfigData =
         | Some mapping -> snd mapping
         | None -> (snd mapping).FullName
 
+/// Represents a set of configuration instructions that guide the Automapper regarding mapping of specific types such as whether to register as a singleton, use policy injection or multimapping etc.
 type AutomapperConfig private (data : AutomapperConfigData) = 
-    
     /// Creates a new AutomapperConfig that can be composed using chained fluent-API style methods.
     static member Create() = 
         AutomapperConfig { DoNotMapTypes = []
@@ -99,3 +99,8 @@ type AutomapperConfig private (data : AutomapperConfigData) =
     /// <returns></returns>
     member x.AndMapAsSingleton([<ParamArray>] types) = 
         x.AndMapWithLifetimeManager<ContainerControlledLifetimeManager>(types)
+
+/// Represents a provider of AutomapperConfig. Implement this interface if you wish to register type-specific mapping guidance instead of (or addition to) using attribute-based configuration on types directly.
+type IAutomapperConfigProvider =
+    /// Returns an instance of the AutomapperConfig to use for configuration.
+    abstract member CreateConfiguration : unit -> AutomapperConfig
