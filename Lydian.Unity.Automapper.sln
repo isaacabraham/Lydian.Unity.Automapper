@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30110.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lydian.Unity.Automapper.Console", "Lydian.Unity.Automapper.Console\Lydian.Unity.Automapper.Console.csproj", "{12FE224E-303D-4D6A-9E7D-AE14345B4E08}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lydian.Unity.Automapper", "Lydian.Unity.Automapper\Lydian.Unity.Automapper.csproj", "{BE84F22D-3041-49C8-96B6-44192DF17302}"
@@ -32,10 +34,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{C90891
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Lydian.Unity.Automapper.Fs", "Lydian.Unity.Automapper.Fs\Lydian.Unity.Automapper.Fs.fsproj", "{687E1FFF-4532-41B5-9B38-441C089B47EA}"
+EndProject
 Global
-	GlobalSection(TestCaseManagementSettings) = postSolution
-		CategoryFile = Lydian.Unity.Automapper.vsmdi
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|Mixed Platforms = Debug|Mixed Platforms
@@ -139,6 +140,21 @@ Global
 		{AE0E6BE2-8601-4F1D-99BD-630E50AA443A}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{AE0E6BE2-8601-4F1D-99BD-630E50AA443A}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{AE0E6BE2-8601-4F1D-99BD-630E50AA443A}.Release|x86.ActiveCfg = Release|Any CPU
+		{687E1FFF-4532-41B5-9B38-441C089B47EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{687E1FFF-4532-41B5-9B38-441C089B47EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{687E1FFF-4532-41B5-9B38-441C089B47EA}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{687E1FFF-4532-41B5-9B38-441C089B47EA}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{687E1FFF-4532-41B5-9B38-441C089B47EA}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{687E1FFF-4532-41B5-9B38-441C089B47EA}.Publish|Any CPU.ActiveCfg = Release|Any CPU
+		{687E1FFF-4532-41B5-9B38-441C089B47EA}.Publish|Any CPU.Build.0 = Release|Any CPU
+		{687E1FFF-4532-41B5-9B38-441C089B47EA}.Publish|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{687E1FFF-4532-41B5-9B38-441C089B47EA}.Publish|Mixed Platforms.Build.0 = Release|Any CPU
+		{687E1FFF-4532-41B5-9B38-441C089B47EA}.Publish|x86.ActiveCfg = Release|Any CPU
+		{687E1FFF-4532-41B5-9B38-441C089B47EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{687E1FFF-4532-41B5-9B38-441C089B47EA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{687E1FFF-4532-41B5-9B38-441C089B47EA}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{687E1FFF-4532-41B5-9B38-441C089B47EA}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{687E1FFF-4532-41B5-9B38-441C089B47EA}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -150,5 +166,8 @@ Global
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		EnterpriseLibraryConfigurationToolBinariesPath = packages\Unity.2.1.505.0\lib\NET35;packages\Unity.Interception.2.1.505.0\lib\NET35;packages\Unity.2.1.505.2\lib\NET35;packages\Unity.Interception.2.1.505.2\lib\NET35
+	EndGlobalSection
+	GlobalSection(TestCaseManagementSettings) = postSolution
+		CategoryFile = Lydian.Unity.Automapper.vsmdi
 	EndGlobalSection
 EndGlobal
