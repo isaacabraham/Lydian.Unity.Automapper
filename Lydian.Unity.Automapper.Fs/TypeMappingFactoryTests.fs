@@ -1,8 +1,9 @@
-﻿module Lydian.Unity.Automapper.Fs.TypeMappingFactoryTests      
+﻿module ``Type Mapping Factory Tests``
 
 open FsUnit.Xunit
 open FsUnit.CustomMatchers
-open Lydian.Unity.Automapper.Fs.TypeMappingFactory
+open Lydian.Unity.Automapper.TypeMappingFactory
+open Lydian.Unity.Automapper
 open System
 open System.Collections.Generic
 open Swensen.Unquote.Assertions
@@ -24,8 +25,8 @@ type OpenGenericConcreteTwo<'T1, 'T2>() = interface IGenericInterface<'T1, 'T2>
 
 let private assertMapping fromType toType shouldExist mappings =
     let mapping = mappings |> Seq.filter(fun mapping -> fst mapping = fromType)
-                           |> Seq.filter(fun mapping -> snd mapping = toType)
-                           |> Seq.exists(fun t -> true)
+                            |> Seq.filter(fun mapping -> snd mapping = toType)
+                            |> Seq.exists(fun t -> true)
 
     test <@ mapping = shouldExist @>
 
@@ -109,7 +110,7 @@ let ``A concrete marked with DoNotMap is not mapped``() =
     mappings |> assertMappingDoesNotExist<IInterface, InterfaceImplementation>
 
 [<Fact>]
-let CreateMappings_InterfaceIsDoNotMap_DoesNotMap() =
+let ``Interfaces marked with DoNotMap are not mapped``() =
     let config = { defaultConfig with DoNotMapTypes = [ typeof<IInterface> ] }
 
     // Act

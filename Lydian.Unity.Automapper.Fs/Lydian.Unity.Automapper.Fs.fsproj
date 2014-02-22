@@ -76,20 +76,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Script.fsx" />
     <None Include="packages.config" />
     <Compile Include="AutomapperConfig.fs" />
     <Compile Include="Mapper.fs" />
     <Compile Include="TypeMappingFactory.fs" />
     <Compile Include="TypeMappingFactoryTests.fs" />
     <None Include="app.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Lydian.Unity.Automapper\Lydian.Unity.Automapper.csproj">
-      <Name>Lydian.Unity.Automapper</Name>
-      <Project>{be84f22d-3041-49c8-96b6-44192df17302}</Project>
-      <Private>True</Private>
-    </ProjectReference>
+    <Compile Include="MappingController.fs" />
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

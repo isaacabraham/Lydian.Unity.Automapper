@@ -1,4 +1,4 @@
-﻿module Lydian.Unity.Automapper.Fs.TypeMappingFactory
+﻿module Lydian.Unity.Automapper.TypeMappingFactory
     open System
     open System.Collections.Generic
     open Microsoft.Practices.Unity
@@ -16,20 +16,21 @@
         if destination.GetGenericArguments().Length <> 1 then raise <| ArgumentException("incorrect number of arguments", "destination")
         destination.MakeGenericType [|genericParameter|]
 
-    let private createAcrMappings(mappings, (configurationDetails:AutomapperConfig)) =
+    let private createAcrMappings(mappings, (configurationDetails:AutomapperConfigData)) =
         mappings
         |> Seq.countBy fst
         |> Seq.filter(fun (key,count) -> count > 1 || key |> configurationDetails.IsMultimap)
         |> Seq.map(fun (key,count) -> getGenericTypeSafely(typedefof<IEnumerable<_>>, key), getGenericTypeSafely(typedefof<UnityCollectionFacade<_>>, key))
         |> Seq.toList
     
-    let getGenericallyOpenInterfaces(concrete:Type) =
+    let private getGenericallyOpenInterfaces(concrete:Type) =
         query { for concreteInterface in concrete.GetInterfaces() do
                 let comparisonInterface = if concreteInterface.IsGenericType then concreteInterface.GetGenericTypeDefinition() else concreteInterface
                 let destinationInterface = if concrete.IsGenericType then comparisonInterface else concreteInterface
                 select (comparisonInterface, destinationInterface) }
 
-    let createMappings((behaviors:MappingBehaviors), (configurationDetails:AutomapperConfig), (types:Type seq)) =          
+    /// Creates auto-generated mappings from which to perform registrations on.
+    let createMappings((behaviors:MappingBehaviors), (configurationDetails:AutomapperConfigData), (types:Type seq)) =          
         let results = query { for availableInterface in types
                                                         |> Seq.filter(fun t -> t.IsInterface)
                                                         |> Seq.filter configurationDetails.IsMappable do

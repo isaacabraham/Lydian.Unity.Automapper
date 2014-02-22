@@ -1,4 +1,4 @@
-﻿namespace Lydian.Unity.Automapper.Fs
+﻿namespace Lydian.Unity.Automapper
 
 open System
 
@@ -27,7 +27,7 @@ module Mapper =
     let private NULL_MAPPING_OPTIONS = { Behaviors = MappingBehaviors.None }
       
     let CreateController(target) =
-        let internalContainer = new UnityContainer()
+        //let internalContainer = new UnityContainer()
         
 //        internalContainer.RegisterType<ITypeMappingHandler, TypeMappingHandler>();
 //        internalContainer.RegisterType<IRegistrationNameFactory, RegistrationNameFactory>();
