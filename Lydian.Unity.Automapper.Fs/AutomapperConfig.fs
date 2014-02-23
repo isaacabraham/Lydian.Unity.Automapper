@@ -31,7 +31,6 @@ type internal AutomapperConfigData =
 
 /// Represents a set of configuration instructions that guide the Automapper regarding mapping of specific types such as whether to register as a singleton, use policy injection or multimapping etc.
 type AutomapperConfig internal (data : AutomapperConfigData) = 
-
     member internal x.Data with get() = data
     
     /// Creates a new AutomapperConfig that can be composed using chained fluent-API style methods.
@@ -81,19 +80,13 @@ type AutomapperConfig internal (data : AutomapperConfigData) =
     /// <param name="types">The set of types to register.</param>
     /// <returns></returns>
     member x.AndMapWithLifetimeManager<'TLifetimePolicy when 'TLifetimePolicy :> LifetimeManager>([<ParamArray>] types : Type []) = 
-        match types |> Seq.tryFind (fun t -> data.IsMarkedWithCustomLifetimeManager(t).IsSome) with
-        | Some duplicateLifetimeManager -> 
-            raise 
-                (InvalidOperationException
-                     (sprintf "The type %s has multiple lifetime managers specified." duplicateLifetimeManager.Name))
-        | None -> 
-            let lifetimeManagerType = typeof<'TLifetimePolicy>
-            AutomapperConfig { data with CustomLifetimeManagerTypes = 
-                                             data.CustomLifetimeManagerTypes @ (types
-                                                                                |> Seq.map 
-                                                                                       (fun theType -> 
-                                                                                       theType, lifetimeManagerType)
-                                                                                |> Seq.toList) }
+        let lifetimeManagerType = typeof<'TLifetimePolicy>
+        AutomapperConfig { data with CustomLifetimeManagerTypes = 
+                                         data.CustomLifetimeManagerTypes @ (types
+                                                                            |> Seq.map 
+                                                                                   (fun theType -> 
+                                                                                   theType, lifetimeManagerType)
+                                                                            |> Seq.toList) }
     
     /// <summary>
     /// Indicates that the specified types should be registered as singletons, that is using the ContainerControlledLifetimeManager.
