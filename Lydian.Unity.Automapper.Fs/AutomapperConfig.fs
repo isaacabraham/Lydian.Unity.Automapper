@@ -30,7 +30,9 @@ type internal AutomapperConfigData =
         | None -> (snd mapping).FullName
 
 /// Represents a set of configuration instructions that guide the Automapper regarding mapping of specific types such as whether to register as a singleton, use policy injection or multimapping etc.
-type AutomapperConfig private (data : AutomapperConfigData) = 
+type AutomapperConfig internal (data : AutomapperConfigData) = 
+
+    member internal x.Data with get() = data
     
     /// Creates a new AutomapperConfig that can be composed using chained fluent-API style methods.
     static member Create() = 

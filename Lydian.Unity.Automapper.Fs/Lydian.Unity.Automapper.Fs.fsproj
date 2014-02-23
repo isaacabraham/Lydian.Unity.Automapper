@@ -84,6 +84,7 @@
     <Compile Include="TypeMappingFactory.fs" />
     <Compile Include="MappingController.fs" />
     <Compile Include="TypeMappingFactoryTests.fs" />
+    <Compile Include="AutomapperConfigTests.fs" />
     <None Include="app.config" />
   </ItemGroup>
   <PropertyGroup>
