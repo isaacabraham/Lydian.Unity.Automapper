@@ -78,12 +78,13 @@
   <ItemGroup>
     <None Include="packages.config" />
     <Compile Include="AutomapperConfig.fs" />
+    <Compile Include="Attributes.fs" />
+    <Compile Include="ConfigurationBuilder.fs" />
     <Compile Include="Mapper.fs" />
     <Compile Include="TypeMappingFactory.fs" />
+    <Compile Include="MappingController.fs" />
     <Compile Include="TypeMappingFactoryTests.fs" />
     <None Include="app.config" />
-    <Compile Include="MappingController.fs" />
-    <Compile Include="Attributes.fs" />
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

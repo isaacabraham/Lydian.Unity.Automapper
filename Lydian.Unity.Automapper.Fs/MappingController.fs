@@ -1,4 +1,4 @@
-﻿module Lydian.Unity.Automapper.MappingController
+﻿module internal Lydian.Unity.Automapper.MappingController
 
 open System.Reflection
 
