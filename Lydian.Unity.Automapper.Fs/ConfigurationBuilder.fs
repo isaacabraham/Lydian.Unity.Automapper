@@ -1,4 +1,4 @@
-﻿module internal Lydian.Unity.Automapper.ConfigurationBuilder
+﻿module Lydian.Unity.Automapper.ConfigurationBuilder
 
 open Microsoft.Practices.Unity
 open System

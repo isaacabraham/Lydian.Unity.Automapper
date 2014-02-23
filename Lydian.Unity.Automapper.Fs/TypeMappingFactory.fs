@@ -3,6 +3,7 @@
 open Microsoft.Practices.Unity
 open System
 open System.Collections.Generic
+open Lydian.Unity.Automapper
 
 /// A facade on top of a Unity call to ResolveAll for a particular type.
 type internal UnityCollectionFacade<'a>(targetContainer : IUnityContainer) = 

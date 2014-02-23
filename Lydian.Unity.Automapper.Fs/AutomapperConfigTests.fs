@@ -92,12 +92,6 @@ let ``MapWithLifetimeManager correctly merges list``() =
     test <@ Seq.length config.Data.CustomLifetimeManagerTypes = 2 @>
 
 [<Fact>]
-let ``MapWithLifetimeManager prevents adding multiple lifetime managers for the same type``() =
-    let config = AutomapperConfig { defaultConfig with CustomLifetimeManagerTypes = [ typeof<string> , typeof<ContainerControlledLifetimeManager> ] }
-    
-    raises<InvalidOperationException> <@ config.AndMapWithLifetimeManager<HierarchicalLifetimeManager>(typeof<string>) @>
-
-[<Fact>]
 let ``MapAsSingleton uses Container Controlled Lifetime Manager``() =
     let config = AutomapperConfig.Create()
                                  .AndMapAsSingleton(typeof<int>)

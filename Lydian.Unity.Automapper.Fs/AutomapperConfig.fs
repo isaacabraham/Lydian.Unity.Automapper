@@ -3,7 +3,7 @@
 open Microsoft.Practices.Unity
 open System
 
-type internal AutomapperConfigData = 
+type AutomapperConfigData = 
     { DoNotMapTypes : Type list
       ExplicitNamedMappings : (Type * string) list
       MultimapTypes : Type list
