@@ -1,9 +1,11 @@
-﻿#r @"C:\Users\isaac\Source\Repos\Lydian.Unity.Automapper\packages\Unity.2.1.505.2\lib\NET35\Microsoft.Practices.Unity.dll"
-#r @"C:\Users\isaac\Source\Repos\Lydian.Unity.Automapper\packages\Unity.Interception.2.1.505.2\lib\NET35\Microsoft.Practices.Unity.Interception.dll"
+﻿#r @"..\packages\Unity.2.1.505.2\lib\NET35\Microsoft.Practices.Unity.dll"
+#r @"..\packages\Unity.Interception.2.1.505.2\lib\NET35\Microsoft.Practices.Unity.Interception.dll"
 
 #load "Types.fs"
 #load "AutomapperConfig.fs"
 #load "Attributes.fs"
+open Lydian.Unity.Automapper
+#load "MappingValidator.fs"
 open Lydian.Unity.Automapper
 #load "ConfigurationBuilder.fs"
 open Lydian.Unity.Automapper
@@ -27,8 +29,8 @@ type InterfaceImplementationTwo() =
     interface IInterface
 
 let container = new UnityContainer()
-let types = [ typeof<IInterface>; typeof<InterfaceImplementation>; typeof<InterfaceImplementationTwo> ]
+let types = [ typeof<IInterface>; typeof<InterfaceImplementation> ]
 
-Mapper.AutomapTypes(container, { Behaviors = MappingBehaviors.CollectionRegistration }, types)
+Mapper.AutomapTypes(container, { Behaviors = MappingBehaviors.None }, types)
 
-container.Registrations |> Seq.map(fun r -> sprintf "%s -> %s (%s)" r.RegisteredType.FullName r.MappedToType.FullName r.Name)
+container.Registrations |> Seq.map(fun r -> sprintf "%s -> %s (%s)" r.RegisteredType.FullName r.MappedToType.FullName r.Name) |> Seq.toArray

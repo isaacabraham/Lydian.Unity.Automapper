@@ -9,10 +9,10 @@ open TypeMappingFactory
 let registerTypes types behaviors container = 
     let configurationDetails = buildConfiguration (types)
     let mappings = createMappings (behaviors, configurationDetails, types)
-    registerTypes (container, mappings, configurationDetails, behaviors)
+    registerMappings (container, mappings, configurationDetails, behaviors)
 
 /// Registers types found in the supplied assemblies into the Unity container.
-let registerAssemblies(assemblyNames : string seq) = 
+let registerAssemblies (assemblyNames : string seq) = 
     let types = 
         assemblyNames
         |> Seq.map Assembly.Load

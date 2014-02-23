@@ -5,21 +5,6 @@ open System
 open System.Collections.Generic
 open Lydian.Unity.Automapper
 
-/// A facade on top of a Unity call to ResolveAll for a particular type.
-type internal UnityCollectionFacade<'a>(targetContainer : IUnityContainer) = 
-    
-    let collection = 
-        seq { 
-            for resolvedType in targetContainer.ResolveAll<'a>() do
-                yield resolvedType
-        }
-    
-    interface IEnumerable<'a> with
-        member this.GetEnumerator() = collection.GetEnumerator()
-    
-    interface System.Collections.IEnumerable with
-        member this.GetEnumerator() = collection.GetEnumerator() :> _
-
 let private getGenericTypeSafely ((destination : Type), genericParameter) = 
     if not destination.IsGenericTypeDefinition then 
         raise <| ArgumentException("source must be a generic type definition", "source")
