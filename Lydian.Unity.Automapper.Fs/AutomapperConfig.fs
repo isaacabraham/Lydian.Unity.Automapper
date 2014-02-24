@@ -3,7 +3,7 @@
 open Microsoft.Practices.Unity
 open System
 
-type AutomapperConfigData = 
+type internal AutomapperConfigData = 
     { DoNotMapTypes : Type list
       ExplicitNamedMappings : (Type * string) list
       MultimapTypes : Type list
@@ -31,7 +31,7 @@ type AutomapperConfigData =
 
 /// Represents a set of configuration instructions that guide the Automapper regarding mapping of specific types such as whether to register as a singleton, use policy injection or multimapping etc.
 type AutomapperConfig internal (data : AutomapperConfigData) = 
-    member internal x.Data with get() = data
+    member x.Data with internal get () = data
     
     /// Creates a new AutomapperConfig that can be composed using chained fluent-API style methods.
     static member Create() = 

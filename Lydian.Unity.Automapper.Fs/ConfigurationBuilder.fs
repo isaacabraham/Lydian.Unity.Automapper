@@ -1,5 +1,7 @@
-﻿module Lydian.Unity.Automapper.ConfigurationBuilder
+﻿/// Responsible for constructing configuration data used by the Automapper.
+module internal Lydian.Unity.Automapper.Core.ConfigurationBuilder
 
+open Lydian.Unity.Automapper
 open Microsoft.Practices.Unity
 open System
 
@@ -20,14 +22,17 @@ let private buildConfigurationFromAttributes types =
     { DoNotMapTypes = types |> getTypesWith<DoNotMapAttribute>
       MultimapTypes = types |> getTypesWith<MultimapAttribute>
       PolicyInjectionTypes = types |> getTypesWith<PolicyInjectionAttribute>
-      ExplicitNamedMappings = types
-                              |> Seq.choose getMapAsName
-                              |> Seq.toList
-      CustomLifetimeManagerTypes = types
-                                   |> Seq.collect 
-                                           (fun t -> t.GetCustomAttributes(typeof<CustomLifetimeManagerAttribute>, false) 
-                                                     |> Seq.map (fun att -> t, (att :?> CustomLifetimeManagerAttribute).LifetimeManagerType))
-                                   |> Seq.toList }
+      ExplicitNamedMappings = 
+          types
+          |> Seq.choose getMapAsName
+          |> Seq.toList
+      CustomLifetimeManagerTypes = 
+          types
+          |> Seq.collect 
+                 (fun t -> 
+                 t.GetCustomAttributes(typeof<CustomLifetimeManagerAttribute>, false) 
+                 |> Seq.map (fun att -> t, (att :?> CustomLifetimeManagerAttribute).LifetimeManagerType))
+          |> Seq.toList }
 
 let private buildConfigurationFromProviders types = 
     types
@@ -37,6 +42,7 @@ let private buildConfigurationFromProviders types =
     |> Seq.map (fun p -> p.CreateConfiguration().Data)
     |> Seq.toList
 
+/// Builds an Automapper Configuration Data from the supplied types, using any attributes and providers found.
 let buildConfiguration types = 
     buildConfigurationFromAttributes types :: buildConfigurationFromProviders types
     |> Seq.reduce (fun output current -> 

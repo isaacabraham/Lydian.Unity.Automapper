@@ -3,7 +3,7 @@
 open FsUnit.CustomMatchers
 open FsUnit.Xunit
 open Lydian.Unity.Automapper
-open Lydian.Unity.Automapper.TypeMappingFactory
+open Lydian.Unity.Automapper.Core.TypeMappingFactory
 open Swensen.Unquote.Assertions
 open System
 open System.Collections.Generic

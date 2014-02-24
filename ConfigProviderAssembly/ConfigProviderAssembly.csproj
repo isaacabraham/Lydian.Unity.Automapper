@@ -66,13 +66,16 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Lydian.Unity.Automapper\Lydian.Unity.Automapper.csproj">
-      <Project>{be84f22d-3041-49c8-96b6-44192df17302}</Project>
-      <Name>Lydian.Unity.Automapper</Name>
-    </ProjectReference>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Lydian.Unity.Automapper.Fs\Lydian.Unity.Automapper.Fs.fsproj">
+      <Project>{687e1fff-4532-41b5-9b38-441c089b47ea}</Project>
+      <Name>Lydian.Unity.Automapper.Fs</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />

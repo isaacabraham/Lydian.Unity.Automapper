@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using ConfigProviderAssembly;
+﻿using ConfigProviderAssembly;
 using Lydian.Disposable;
 using Lydian.Disposable.Switches;
 using Lydian.Unity.Automapper;
@@ -10,6 +9,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Reflection;
 
 namespace ConsoleApplication1
@@ -85,6 +85,7 @@ namespace ConsoleApplication1
         private static void PerformSmokeTest(MappingBehaviors behaviors)
         {
             Console.WriteLine();
+            
             using (var container = new UnityContainer())
             {
                 using (new ColorSwitch(ConsoleColor.Yellow).AsDisposable())

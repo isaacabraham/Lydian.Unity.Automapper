@@ -218,6 +218,10 @@
       <Project>{9fa144fe-23a6-4f6c-8576-fc16ebf4037c}</Project>
       <Name>ConfigProviderAssembly</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Lydian.Unity.Automapper.Fs\Lydian.Unity.Automapper.Fs.fsproj">
+      <Project>{687e1fff-4532-41b5-9b38-441c089b47ea}</Project>
+      <Name>Lydian.Unity.Automapper.Fs</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Lydian.Unity.Automapper.Test.OtherTestAssembly\Lydian.Unity.Automapper.Test.TestAssemblyTwo.csproj">
       <Project>{ae0e6be2-8601-4f1d-99bd-630e50aa443a}</Project>
       <Name>Lydian.Unity.Automapper.Test.TestAssemblyTwo</Name>
@@ -225,10 +229,6 @@
     <ProjectReference Include="..\Lydian.Unity.Automapper.Test.TestAssembly\Lydian.Unity.Automapper.Test.TestAssembly.csproj">
       <Project>{7e5ff6ec-04ec-4059-aa8d-55753ec65152}</Project>
       <Name>Lydian.Unity.Automapper.Test.TestAssembly</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Lydian.Unity.Automapper\Lydian.Unity.Automapper.csproj">
-      <Project>{BE84F22D-3041-49C8-96B6-44192DF17302}</Project>
-      <Name>Lydian.Unity.Automapper</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

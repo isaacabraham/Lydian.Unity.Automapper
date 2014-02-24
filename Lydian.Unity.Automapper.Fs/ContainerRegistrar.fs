@@ -1,7 +1,8 @@
-﻿module internal Lydian.Unity.Automapper.ContainerRegistrar
+﻿/// Validates and enters mappings into the Unity container.
+module internal Lydian.Unity.Automapper.Core.ContainerRegistrar
 
 open Lydian.Unity.Automapper
-open Lydian.Unity.Automapper.MappingValidator
+open Lydian.Unity.Automapper.Core.MappingValidator
 open Microsoft.Practices.Unity
 open Microsoft.Practices.Unity.InterceptionExtension
 open System
@@ -43,17 +44,32 @@ let private getRegistrationName mappings =
         if (namedMappingRequested || namedMappingRequired) then Some((mapFrom, mapTo) |> configuration.GetNamedMapping)
         else None
 
+let private setInterceptionIfRequired mappingDetails (container : IUnityContainer) = 
+    if mappingDetails 
+       |> Seq.exists (fun (_, _, _, injectionMembers : InjectionMember [], _) -> injectionMembers.Length > 0) then 
+        container.AddNewExtension<Interception>() |> ignore
+
+/// Registers the supplied set of mappings into the container using the provided configuration and behaviors.
 let registerMappings ((container : IUnityContainer), (mappings : (Type * Type) seq), 
                       (configuration : AutomapperConfigData), behaviors) = 
     let getRegistrationName = getRegistrationName mappings
+    
+    let mappingDetails = 
+        mappings
+        |> Seq.map (fun mapping -> 
+               let mapFrom, mapTo = mapping
+               let lifetime = mapFrom |> getLifetimeManager configuration
+               let injectionMembers = mapping |> getInjectionMembers configuration
+               let registrationName = mapping |> getRegistrationName configuration behaviors
+               mapFrom, mapTo, lifetime, injectionMembers, registrationName)
+        |> Seq.cache
+    
     let validateMapping = validateMapping configuration container behaviors
-    for mapping in mappings do
-        validateMapping mapping
-        let mapFrom, mapTo = mapping
-        let lifetime = mapFrom |> getLifetimeManager configuration
-        let injectionMembers = mapping |> getInjectionMembers configuration
-        let registrationName = mapping |> getRegistrationName configuration behaviors
+    for mappingDetail in mappingDetails do
+        let mapFrom, mapTo, lifetime, injectionMembers, registrationName = mappingDetail
+        validateMapping (mapFrom, mapTo)
         match registrationName with
         | Some registrationName -> container.RegisterType(mapFrom, mapTo, registrationName, lifetime, injectionMembers)
         | None -> container.RegisterType(mapFrom, mapTo, lifetime, injectionMembers)
         |> ignore
+    container |> setInterceptionIfRequired (mappingDetails)

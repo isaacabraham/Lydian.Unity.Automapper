@@ -1,9 +1,10 @@
-﻿module internal Lydian.Unity.Automapper.TypeMappingFactory
+﻿/// Creates type mappings from a supplied set of types.
+module internal Lydian.Unity.Automapper.Core.TypeMappingFactory
 
+open Lydian.Unity.Automapper
 open Microsoft.Practices.Unity
 open System
 open System.Collections.Generic
-open Lydian.Unity.Automapper
 
 let private getGenericTypeSafely ((destination : Type), genericParameter) = 
     if not destination.IsGenericTypeDefinition then 
@@ -11,16 +12,6 @@ let private getGenericTypeSafely ((destination : Type), genericParameter) =
     if destination.GetGenericArguments().Length <> 1 then 
         raise <| ArgumentException("incorrect number of arguments", "destination")
     destination.MakeGenericType [| genericParameter |]
-
-let private createAcrMappings (mappings, (configurationDetails : AutomapperConfigData)) = 
-    mappings
-    |> Seq.countBy fst
-    |> Seq.filter (fun (key, count) -> count > 1 || key |> configurationDetails.IsMultimap)
-    |> Seq.map 
-           (fun (key, count) -> 
-           getGenericTypeSafely (typedefof<IEnumerable<_>>, key), 
-           getGenericTypeSafely (typedefof<UnityCollectionFacade<_>>, key))
-    |> Seq.toList
 
 let private getGenericallyOpenInterfaces (concrete : Type) = 
     query { 
@@ -63,9 +54,15 @@ let createMappings ((behaviors : MappingBehaviors), (configurationDetails : Auto
                              |> snd), (fst mapping))
         }
     
-    let acrMappings = 
-        match behaviors.HasFlag MappingBehaviors.CollectionRegistration with
-        | true -> createAcrMappings (results, configurationDetails)
-        | _ -> []
-    
-    (results |> Seq.toList) @ acrMappings
+    results |> Seq.toList
+
+/// Creates Automatic Collection Registrations from the set of mappings and configuration data.
+let createAcrMappings (configurationDetails : AutomapperConfigData) mappings = 
+    mappings @ (mappings
+                |> Seq.countBy fst
+                |> Seq.filter (fun (key, count) -> count > 1 || key |> configurationDetails.IsMultimap)
+                |> Seq.map 
+                       (fun (key, count) -> 
+                       getGenericTypeSafely (typedefof<IEnumerable<_>>, key), 
+                       getGenericTypeSafely (typedefof<UnityCollectionFacade<_>>, key))
+                |> Seq.toList)

@@ -9,11 +9,12 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Lydian.Unity.Automapper.Fs</RootNamespace>
     <AssemblyName>Lydian.Unity.Automapper.Fs</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFSharpCoreVersion>4.3.1.0</TargetFSharpCoreVersion>
     <Name>Lydian.Unity.Automapper.Fs</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -92,7 +93,6 @@
     <Compile Include="ConfigurationBuilder.fs" />
     <Compile Include="TypeMappingFactory.fs" />
     <Compile Include="ContainerRegistrar.fs" />
-    <Compile Include="MappingController.fs" />
     <Compile Include="Mapper.fs" />
     <Compile Include="TypeMappingFactoryTests.fs" />
     <Compile Include="AutomapperConfigTests.fs" />
