@@ -5,15 +5,15 @@ open Lydian.Unity.Automapper
 open Microsoft.Practices.Unity
 open System
 
-let private hasAttribute<'a> (t : Type) = t.GetCustomAttributes(typeof<'a>, false)
-                                          |> Seq.length > 0
+let private hasAttribute<'a>(t: Type) = t.GetCustomAttributes(typeof<'a>, false)
+                                        |> Seq.length > 0
 let private getTypesWith<'a> = Seq.filter hasAttribute<'a> >> Seq.toList
 
-let private getMapAsName (t : Type) = 
+let private getMapAsName(t: Type) = 
     let mapAsAttribute = 
         t.GetCustomAttributes(typeof<MapAsAttribute>, false)
-        |> Seq.map (fun att -> att :?> MapAsAttribute)
-        |> Seq.tryFind (fun t -> true)
+        |> Seq.map(fun att -> att :?> MapAsAttribute)
+        |> Seq.tryFind(fun t -> true)
     match mapAsAttribute with
     | Some mapAsAttribute -> Some(t, mapAsAttribute.MappingName)
     | None -> None
@@ -28,10 +28,10 @@ let private buildConfigurationFromAttributes types =
           |> Seq.toList
       CustomLifetimeManagerTypes = 
           types
-          |> Seq.collect 
+          |> Seq.collect
                  (fun t -> 
                  t.GetCustomAttributes(typeof<CustomLifetimeManagerAttribute>, false) 
-                 |> Seq.map (fun att -> t, (att :?> CustomLifetimeManagerAttribute).LifetimeManagerType))
+                 |> Seq.map(fun att -> t, (att :?> CustomLifetimeManagerAttribute).LifetimeManagerType))
           |> Seq.toList }
 
 let private buildConfigurationFromProviders types = 
@@ -39,13 +39,13 @@ let private buildConfigurationFromProviders types =
     |> Seq.filter typeof<IAutomapperConfigProvider>.IsAssignableFrom
     |> Seq.map Activator.CreateInstance
     |> Seq.cast<IAutomapperConfigProvider>
-    |> Seq.map (fun p -> p.CreateConfiguration().Data)
+    |> Seq.map(fun p -> p.CreateConfiguration().Data)
     |> Seq.toList
 
 /// Builds an Automapper Configuration Data from the supplied types, using any attributes and providers found.
 let buildConfiguration types = 
     buildConfigurationFromAttributes types :: buildConfigurationFromProviders types
-    |> Seq.reduce (fun output current -> 
+    |> Seq.reduce(fun output current -> 
            { CustomLifetimeManagerTypes = output.CustomLifetimeManagerTypes @ current.CustomLifetimeManagerTypes
              DoNotMapTypes = output.DoNotMapTypes @ current.DoNotMapTypes
              ExplicitNamedMappings = output.ExplicitNamedMappings @ current.ExplicitNamedMappings

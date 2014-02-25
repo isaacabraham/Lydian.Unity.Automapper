@@ -87,7 +87,7 @@ let ``MapWithLifetimeManager correctly merges list``() =
     let config = 
         (AutomapperConfig 
              { defaultConfig with CustomLifetimeManagerTypes = 
-                                      [ typeof<string>, typeof<ContainerControlledLifetimeManager> ] }).AndMapWithLifetimeManager<ContainerControlledLifetimeManager> 
+                                      [ typeof<string>, typeof<ContainerControlledLifetimeManager> ] }).AndMapWithLifetimeManager<ContainerControlledLifetimeManager>
             (typeof<int>)
     test <@ Seq.length config.Data.CustomLifetimeManagerTypes = 2 @>
 

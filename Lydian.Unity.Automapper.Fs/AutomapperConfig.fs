@@ -4,33 +4,33 @@ open Microsoft.Practices.Unity
 open System
 
 type internal AutomapperConfigData = 
-    { DoNotMapTypes : Type list
-      ExplicitNamedMappings : (Type * string) list
-      MultimapTypes : Type list
-      PolicyInjectionTypes : Type list
-      CustomLifetimeManagerTypes : (Type * Type) list }
-    member this.IsMappable(theType : Type) = this.DoNotMapTypes |> List.forall ((<>) theType)
+    { DoNotMapTypes: Type list
+      ExplicitNamedMappings: (Type * string) list
+      MultimapTypes: Type list
+      PolicyInjectionTypes: Type list
+      CustomLifetimeManagerTypes: (Type * Type) list }
+    member this.IsMappable(theType: Type) = this.DoNotMapTypes |> List.forall((<>) theType)
     
-    member this.IsMultimap(theType : Type) = 
+    member this.IsMultimap(theType: Type) = 
         let theType = 
             if theType.IsGenericType then theType.GetGenericTypeDefinition()
             else theType
-        this.MultimapTypes |> List.exists ((=) theType)
+        this.MultimapTypes |> List.exists((=) theType)
     
     member this.IsMarkedWithCustomLifetimeManager theType = 
-        match this.CustomLifetimeManagerTypes |> Seq.tryFind ((fst) >> ((=) theType)) with
+        match this.CustomLifetimeManagerTypes |> Seq.tryFind((fst) >> ((=) theType)) with
         | Some(_, lifetimeManager) -> Some(Activator.CreateInstance(lifetimeManager) :?> LifetimeManager)
         | None -> None
     
-    member this.IsNamedMapping theType = this.ExplicitNamedMappings |> Seq.exists ((fst) >> ((=) theType))
-    member this.IsMarkedForPolicyInjection theType = this.PolicyInjectionTypes |> Seq.exists ((=) theType)
+    member this.IsNamedMapping theType = this.ExplicitNamedMappings |> Seq.exists((fst) >> ((=) theType))
+    member this.IsMarkedForPolicyInjection theType = this.PolicyInjectionTypes |> Seq.exists((=) theType)
     member this.GetNamedMapping mapping = 
-        match this.ExplicitNamedMappings |> Seq.tryFind ((fst) >> (=) (snd mapping)) with
+        match this.ExplicitNamedMappings |> Seq.tryFind((fst) >> (=)(snd mapping)) with
         | Some mapping -> snd mapping
         | None -> (snd mapping).FullName
 
 /// Represents a set of configuration instructions that guide the Automapper regarding mapping of specific types such as whether to register as a singleton, use policy injection or multimapping etc.
-type AutomapperConfig internal (data : AutomapperConfigData) = 
+type AutomapperConfig internal (data: AutomapperConfigData) = 
     member x.Data with internal get () = data
     
     /// Creates a new AutomapperConfig that can be composed using chained fluent-API style methods.
@@ -79,11 +79,11 @@ type AutomapperConfig internal (data : AutomapperConfigData) =
     /// </summary>
     /// <param name="types">The set of types to register.</param>
     /// <returns></returns>
-    member x.AndMapWithLifetimeManager<'TLifetimePolicy when 'TLifetimePolicy :> LifetimeManager>([<ParamArray>] types : Type []) = 
+    member x.AndMapWithLifetimeManager<'TLifetimePolicy when 'TLifetimePolicy :> LifetimeManager>([<ParamArray>] types: Type []) = 
         let lifetimeManagerType = typeof<'TLifetimePolicy>
         AutomapperConfig { data with CustomLifetimeManagerTypes = 
                                          data.CustomLifetimeManagerTypes @ (types
-                                                                            |> Seq.map 
+                                                                            |> Seq.map
                                                                                    (fun theType -> 
                                                                                    theType, lifetimeManagerType)
                                                                             |> Seq.toList) }
@@ -99,4 +99,4 @@ type AutomapperConfig internal (data : AutomapperConfigData) =
 /// Represents a provider of AutomapperConfig. Implement this interface if you wish to register type-specific mapping guidance instead of (or addition to) using attribute-based configuration on types directly.
 type IAutomapperConfigProvider = 
     /// Returns an instance of the AutomapperConfig to use for configuration.
-    abstract CreateConfiguration : unit -> AutomapperConfig
+    abstract CreateConfiguration: unit -> AutomapperConfig

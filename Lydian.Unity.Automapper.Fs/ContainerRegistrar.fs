@@ -8,10 +8,10 @@ open Microsoft.Practices.Unity.InterceptionExtension
 open System
 open System.Reflection
 
-let private getInjectionMembers (configuration : AutomapperConfigData) (mapFrom, mapTo) = 
-    let hasHandlerAttribute (theType : Type) = 
-        let memberInfoHasHandlerAttribute (mi : MemberInfo) = mi.GetCustomAttributes(typeof<HandlerAttribute>, false)
-                                                              |> Seq.length > 0
+let private getInjectionMembers (configuration: AutomapperConfigData) (mapFrom, mapTo) = 
+    let hasHandlerAttribute(theType: Type) = 
+        let memberInfoHasHandlerAttribute(mi: MemberInfo) = mi.GetCustomAttributes(typeof<HandlerAttribute>, false)
+                                                            |> Seq.length > 0
         theType
         |> memberInfoHasHandlerAttribute || theType.GetMethods() |> Seq.exists memberInfoHasHandlerAttribute
     
@@ -23,7 +23,7 @@ let private getInjectionMembers (configuration : AutomapperConfigData) (mapFrom,
            InterceptionBehavior<PolicyInjectionBehavior>() :> InjectionMember |]
     else Array.empty<InjectionMember>
 
-let private getLifetimeManager (configuration : AutomapperConfigData) mappingType = 
+let private getLifetimeManager (configuration: AutomapperConfigData) mappingType = 
     match mappingType |> configuration.IsMarkedWithCustomLifetimeManager with
     | Some lifetime -> lifetime
     | None -> TransientLifetimeManager() :> LifetimeManager
@@ -32,30 +32,30 @@ let private getRegistrationName mappings =
     let multimapTypes = 
         mappings
         |> Seq.groupBy fst
-        |> Seq.filter (fun grp -> (snd grp)
-                                  |> Seq.length > 1)
+        |> Seq.filter(fun grp -> (snd grp)
+                                 |> Seq.length > 1)
         |> Seq.map fst
         |> Seq.toArray
-    fun (configuration : AutomapperConfigData) (behaviors : MappingBehaviors) (mapFrom, mapTo) -> 
+    fun (configuration: AutomapperConfigData) (behaviors: MappingBehaviors) (mapFrom, mapTo) -> 
         let namedMappingRequested = mapFrom
                                     |> configuration.IsMultimap || mapTo |> configuration.IsNamedMapping
         let namedMappingRequired = 
-            behaviors.HasFlag(MappingBehaviors.MultimapByDefault) && multimapTypes |> Seq.exists ((=) mapFrom)
+            behaviors.HasFlag(MappingBehaviors.MultimapByDefault) && multimapTypes |> Seq.exists((=) mapFrom)
         if (namedMappingRequested || namedMappingRequired) then Some((mapFrom, mapTo) |> configuration.GetNamedMapping)
         else None
 
-let private setInterceptionIfRequired mappingDetails (container : IUnityContainer) = 
+let private setInterceptionIfRequired mappingDetails (container: IUnityContainer) = 
     if mappingDetails 
-       |> Seq.exists (fun (_, _, _, injectionMembers : InjectionMember [], _) -> injectionMembers.Length > 0) then 
+       |> Seq.exists(fun (_, _, _, injectionMembers: InjectionMember [], _) -> injectionMembers.Length > 0) then 
         container.AddNewExtension<Interception>() |> ignore
 
 /// Registers the supplied set of mappings into the container using the provided configuration and behaviors.
-let registerMappings (container : IUnityContainer, mappings, configuration, behaviors) = 
+let registerMappings(container: IUnityContainer, mappings, configuration, behaviors) = 
     let getRegistrationName = getRegistrationName mappings
     
     let mappingDetails = 
         mappings
-        |> Seq.map (fun mapping -> 
+        |> Seq.map(fun mapping -> 
                let mapFrom, mapTo = mapping
                let lifetime = mapFrom |> getLifetimeManager configuration
                let injectionMembers = mapping |> getInjectionMembers configuration
@@ -63,12 +63,12 @@ let registerMappings (container : IUnityContainer, mappings, configuration, beha
                mapFrom, mapTo, lifetime, injectionMembers, registrationName)
         |> Seq.cache
     
-    let validateMapping = validateMapping configuration container behaviors
+    let validateMapping = validateMapping(configuration, container, behaviors)
     for mappingDetail in mappingDetails do
         let mapFrom, mapTo, lifetime, injectionMembers, registrationName = mappingDetail
-        validateMapping (mapFrom, mapTo)
+        validateMapping(mapFrom, mapTo)
         match registrationName with
         | Some registrationName -> container.RegisterType(mapFrom, mapTo, registrationName, lifetime, injectionMembers)
         | None -> container.RegisterType(mapFrom, mapTo, lifetime, injectionMembers)
         |> ignore
-    container |> setInterceptionIfRequired (mappingDetails)
+    container |> setInterceptionIfRequired(mappingDetails)

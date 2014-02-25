@@ -4,7 +4,7 @@ open Microsoft.Practices.Unity
 open System
 
 /// Marks an interface as using a specific type of lifetime manager for the purposes of registration into Unity when auto-mapping.
-type CustomLifetimeManagerAttribute(lifetimeManagerType : Type) = 
+type CustomLifetimeManagerAttribute(lifetimeManagerType: Type) = 
     inherit Attribute()
     /// The type of lifetime manager specified.
     member x.LifetimeManagerType with get () = lifetimeManagerType
@@ -18,7 +18,7 @@ type DoNotMapAttribute() =
 /// Specifies the name of the mapping that this concrete should be registered into Unity as. For multimaps, if this attribute is not specified, the full name of the type is used.
 [<AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)>]
 [<Sealed>]
-type MapAsAttribute(mappingName : string) = 
+type MapAsAttribute(mappingName: string) = 
     inherit Attribute()
     /// The name of the mapping.
     member x.MappingName with get () = mappingName
