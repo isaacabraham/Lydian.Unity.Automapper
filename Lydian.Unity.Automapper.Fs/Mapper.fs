@@ -26,9 +26,7 @@ type Mapper() =
             |> Seq.collect(fun asm -> asm.GetTypes())
             |> Seq.cache
         Mapper.registerTypes types
-    
-    static member private defaultMappingOptions = { Behaviors = MappingBehaviors.None }
-    
+       
     /// <summary>
     /// Automatically maps and registers interfaces and concrete types into the Unity container.
     /// </summary>
@@ -36,7 +34,10 @@ type Mapper() =
     /// <param name="options">Any custom options to use as guidance when mapping.</param>
     /// <param name="types">The array of interfaces and concretes to map up and register.</param>
     [<Extension>]
-    static member AutomapTypes((container: IUnityContainer), options, [<ParamArray>] types: Type []) = 
+    static member AutomapTypes((container: IUnityContainer), options:MappingOptions, [<ParamArray>] types: Type []) = 
+        if container = null then raise <| ArgumentNullException("container")
+        if options = null then raise <| ArgumentNullException("options")
+        if types = null then raise <| ArgumentNullException("types")
         container |> Mapper.registerTypes types options.Behaviors
     
     /// <summary>
@@ -45,8 +46,10 @@ type Mapper() =
     /// <param name="container">The container to be configured.</param>
     /// <param name="types">The array of interfaces and concretes to map up and register.</param>
     [<Extension>]
-    static member AutomapTypes((container: IUnityContainer), [<ParamArray>] types: Type []) = 
-        Mapper.AutomapTypes(container, Mapper.defaultMappingOptions, types)
+    static member AutomapTypes((container: IUnityContainer), [<ParamArray>] types: Type []) =
+        if container = null then raise <| ArgumentNullException("container")
+        if types = null then raise <| ArgumentNullException("types")
+        Mapper.AutomapTypes(container, MappingOptions(), types)
     
     /// <summary>
     /// Automatically maps and registers interfaces and concrete types found in the supplied assemblies into the Unity container.
@@ -55,7 +58,10 @@ type Mapper() =
     /// <param name="options">Any custom options to use as guidance when mapping.</param>
     /// <param name="assemblyNames">The list of full assembly names to register types from.</param>
     [<Extension>]
-    static member AutomapAssemblies(container: IUnityContainer, options, [<ParamArray>] assemblyNames: string []) = 
+    static member AutomapAssemblies(container: IUnityContainer, options:MappingOptions, [<ParamArray>] assemblyNames: string []) = 
+        if container = null then raise <| ArgumentNullException("container")
+        if options = null then raise <| ArgumentNullException("options")
+        if assemblyNames = null then raise <| ArgumentNullException("assemblyNames")
         container |> Mapper.registerAssemblies assemblyNames options.Behaviors
     
     /// <summary>
@@ -65,4 +71,6 @@ type Mapper() =
     /// <param name="assemblyNames">The list of full assembly names to register types from.</param>
     [<Extension>]
     static member AutomapAssemblies(container: IUnityContainer, assemblyNames) = 
-        Mapper.AutomapAssemblies(container, Mapper.defaultMappingOptions, assemblyNames)
+        if container = null then raise <| ArgumentNullException("container")
+        if assemblyNames = null then raise <| ArgumentNullException("assemblyName")
+        Mapper.AutomapAssemblies(container, MappingOptions(), assemblyNames)

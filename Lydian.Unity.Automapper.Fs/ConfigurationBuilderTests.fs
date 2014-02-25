@@ -68,7 +68,6 @@ let ``Two configuration providers are merged together``() =
 
 [<DoNotMap>]
 [<Singleton>]
-[<CustomLifetimeManager(typeof<HierarchicalLifetimeManager>)>]
 [<MapAs("TEST")>]
 [<Multimap>]
 [<PolicyInjection>]
@@ -76,11 +75,14 @@ type TestType() =
     class
     end
 
+[<CustomLifetimeManager(typeof<HierarchicalLifetimeManager>)>]
+type OtherTest() = class end
+
 [<Fact>]
 let ``A single type with attributes is identified``() = 
-    let config = buildConfiguration [ typeof<TestType> ]
+    let config = buildConfiguration [ typeof<TestType>; typeof<OtherTest> ]
     test <@ config.CustomLifetimeManagerTypes = [ typeof<TestType>, typeof<ContainerControlledLifetimeManager>
-                                                  typeof<TestType>, typeof<HierarchicalLifetimeManager> ] @>
+                                                  typeof<OtherTest>, typeof<HierarchicalLifetimeManager> ] @>
     test <@ config.DoNotMapTypes = [ typeof<TestType> ] @>
     test <@ config.MultimapTypes = [ typeof<TestType> ] @>
     test <@ config.ExplicitNamedMappings = [ typeof<TestType>, "TEST" ] @>
@@ -98,3 +100,14 @@ let ``A type with attributes is merged with provider config``() =
     
     test <@ config.DoNotMapTypes = [ typeof<TestType>
                                      typeof<string> ] @>
+
+[<Fact>]
+let ``A type with two lifetime managers throws an exception``() =
+    let provider = 
+        { new IAutomapperConfigProvider with
+              member this.CreateConfiguration() = AutomapperConfig.Create()
+                                                                  .AndMapAsSingleton(typeof<string>)
+                                                                  .AndMapWithLifetimeManager<HierarchicalLifetimeManager>(typeof<string>) }
+    raises<ArgumentException> <@ buildConfiguration [ provider.GetType() ] @>
+    
+    

@@ -42,6 +42,15 @@ let private buildConfigurationFromProviders types =
     |> Seq.map(fun p -> p.CreateConfiguration().Data)
     |> Seq.toList
 
+let private validate config =
+    let duplicate = config.CustomLifetimeManagerTypes
+                    |> Seq.countBy fst
+                    |> Seq.filter(fun (t,count) -> count > 1)
+                    |> Seq.tryFind(fun x -> true)
+    match duplicate with
+    | Some (t,_) -> raise <| ArgumentException (sprintf "The type %A has multiple lifetime managers specified" t)
+    | None -> config
+
 /// Builds an Automapper Configuration Data from the supplied types, using any attributes and providers found.
 let buildConfiguration types = 
     buildConfigurationFromAttributes types :: buildConfigurationFromProviders types
@@ -51,3 +60,4 @@ let buildConfiguration types =
              ExplicitNamedMappings = output.ExplicitNamedMappings @ current.ExplicitNamedMappings
              MultimapTypes = output.MultimapTypes @ current.MultimapTypes
              PolicyInjectionTypes = output.PolicyInjectionTypes @ current.PolicyInjectionTypes })
+    |> validate

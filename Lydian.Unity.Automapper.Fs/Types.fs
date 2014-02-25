@@ -13,10 +13,10 @@ type MappingBehaviors =
     | CollectionRegistration = 2
 
 /// Contains any options that can be used to help guide the auto-mapping process.
-[<CLIMutable>]
-type MappingOptions = 
-    { /// Any custom behaviors to use when mapping.
-      Behaviors: MappingBehaviors }
+[<AllowNullLiteral>]
+type MappingOptions() = 
+    /// Any custom behaviors to use when mapping.
+    member val Behaviors = MappingBehaviors.None with get, set
 
 /// The exception raised when a concrete type has attempted to be mapped to an interface that is already registered into Unity.
 type DuplicateMappingException private (mapFromType: Type, mapToType: Type, existingToType: Type, message: string, inner) = 
