@@ -94,11 +94,12 @@
     <Compile Include="TypeMappingFactory.fs" />
     <Compile Include="ContainerRegistrar.fs" />
     <Compile Include="Mapper.fs" />
-    <Compile Include="TypeMappingFactoryTests.fs" />
     <Compile Include="AutomapperConfigTests.fs" />
-    <Compile Include="MappingValidatorTests.fs" />
+    <Compile Include="ConfigurationBuilderTests.fs" />
+    <Compile Include="TypeMappingFactoryTests.fs" />
     <None Include="app.config" />
     <None Include="TestScript.fsx" />
+    <Compile Include="MappingValidatorTests.fs" />
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

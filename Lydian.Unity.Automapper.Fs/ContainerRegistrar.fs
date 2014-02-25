@@ -50,8 +50,7 @@ let private setInterceptionIfRequired mappingDetails (container : IUnityContaine
         container.AddNewExtension<Interception>() |> ignore
 
 /// Registers the supplied set of mappings into the container using the provided configuration and behaviors.
-let registerMappings ((container : IUnityContainer), (mappings : (Type * Type) seq), 
-                      (configuration : AutomapperConfigData), behaviors) = 
+let registerMappings (container : IUnityContainer, mappings, configuration, behaviors) = 
     let getRegistrationName = getRegistrationName mappings
     
     let mappingDetails = 

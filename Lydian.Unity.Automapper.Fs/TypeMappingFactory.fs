@@ -67,6 +67,7 @@ let private createAcrMappings (configurationDetails : AutomapperConfigData) mapp
                        getGenericTypeSafely (typedefof<UnityCollectionFacade<_>>, key))
                 |> Seq.toList)
 
+/// Creates a set of type <-> type mappings using the supplied behaviors and configuration over the provided set of types.
 let createMappings ((behaviors : MappingBehaviors), (configuration : AutomapperConfigData), (types : Type seq)) =
     let createMappings = if behaviors.HasFlag(MappingBehaviors.CollectionRegistration) then 
                              createMappingsFromTypes >> (createAcrMappings configuration)
