@@ -216,11 +216,9 @@ let ``Generic interface has multiple open concrete implementations map them all`
 
 [<Fact>]
 let ``ACR with multiple mappings creates a collection``() = 
-    let mappings = 
-        createMappings (MappingBehaviors.CollectionRegistration, defaultConfig, 
-                        [ typeof<IInterface>
-                          typeof<InterfaceImplementation>
-                          typeof<InterfaceImplementationTwo> ])
+    let mappings = createMappings(MappingBehaviors.CollectionRegistration, defaultConfig, [ typeof<IInterface>
+                                                                                            typeof<InterfaceImplementation>
+                                                                                            typeof<InterfaceImplementationTwo> ])
     mappings |> assertMappingExists<IEnumerable<IInterface>, UnityCollectionFacade<IInterface>>
 
 [<Fact>]
@@ -234,7 +232,6 @@ let ``ACR is not enabled for a single concrete if it does not have multimap spec
 [<Fact>]
 let ``ACR is enabled for a single concrete when it has multimap specified in config``() = 
     let config = { defaultConfig with MultimapTypes = [ typeof<IInterface> ] }
-    
     let mappings = 
         createMappings (MappingBehaviors.CollectionRegistration, config, 
                         [ typeof<IInterface>

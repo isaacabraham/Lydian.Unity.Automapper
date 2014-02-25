@@ -40,13 +40,11 @@ type InterfaceImplementationTwo() =
 let container = new UnityContainer()
 
 let types = 
-    [ typeof<IInterface>
-      typeof<InterfaceImplementation>
-      typeof<InterfaceImplementationTwo> ]
+    [| typeof<IInterface>
+       typeof<InterfaceImplementation>
+       typeof<InterfaceImplementationTwo> |]
 
-//Mapper.AutomapTypes(container, { Behaviors = MappingBehaviors.CollectionRegistration }, types)
-//container.Registrations
-//|> Seq.map (fun r -> sprintf "%s -> %s (%s)" r.RegisteredType.FullName r.MappedToType.FullName r.Name)
-//|> Seq.toArray
-type Foo() = 
-    member x.Data with internal get() = 1
+Mapper.AutomapTypes(container, { Behaviors = MappingBehaviors.CollectionRegistration }, types)
+container.Registrations
+|> Seq.map (fun r -> sprintf "%s -> %s (%s)" r.RegisteredType.FullName r.MappedToType.FullName r.Name)
+|> Seq.toArray

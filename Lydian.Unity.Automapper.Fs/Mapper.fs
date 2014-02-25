@@ -16,12 +16,6 @@ type Mapper() =
     
     static member private registerTypes types (behaviors : MappingBehaviors) container = 
         let configuration = buildConfiguration (types)
-        
-        let createMappings = 
-            if behaviors.HasFlag(MappingBehaviors.CollectionRegistration) then 
-                createMappings >> (createAcrMappings configuration)
-            else createMappings
-        
         let mappings = createMappings (behaviors, configuration, types)
         registerMappings (container, mappings, configuration, behaviors)
     

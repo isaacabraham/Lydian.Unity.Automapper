@@ -10,7 +10,7 @@
     <RootNamespace>Lydian.Unity.Automapper.Fs</RootNamespace>
     <AssemblyName>Lydian.Unity.Automapper.Fs</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <TargetFSharpCoreVersion>4.3.1.0</TargetFSharpCoreVersion>
+    <TargetFSharpCoreVersion>4.3.0.0</TargetFSharpCoreVersion>
     <Name>Lydian.Unity.Automapper.Fs</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
@@ -96,6 +96,7 @@
     <Compile Include="Mapper.fs" />
     <Compile Include="TypeMappingFactoryTests.fs" />
     <Compile Include="AutomapperConfigTests.fs" />
+    <Compile Include="MappingValidatorTests.fs" />
     <None Include="app.config" />
     <None Include="TestScript.fsx" />
   </ItemGroup>

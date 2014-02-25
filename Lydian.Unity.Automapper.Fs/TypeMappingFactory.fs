@@ -27,8 +27,8 @@ let private getGenericallyOpenInterfaces (concrete : Type) =
             select (comparisonInterface, destinationInterface)
     }
 
-/// Creates auto-generated mappings from which to perform registrations on.
-let createMappings ((behaviors : MappingBehaviors), (configurationDetails : AutomapperConfigData), (types : Type seq)) = 
+/// Creates auto-generated mappings from a set of types from which to perform registrations on.
+let private createMappingsFromTypes ((behaviors : MappingBehaviors), (configurationDetails : AutomapperConfigData), (types : Type seq)) = 
     let results = 
         query { 
             for availableInterface in types
@@ -56,8 +56,8 @@ let createMappings ((behaviors : MappingBehaviors), (configurationDetails : Auto
     
     results |> Seq.toList
 
-/// Creates Automatic Collection Registrations from the set of mappings and configuration data.
-let createAcrMappings (configurationDetails : AutomapperConfigData) mappings = 
+/// Creates Automatic Collection Registrations from a set of mappings and configuration data.
+let private createAcrMappings (configurationDetails : AutomapperConfigData) mappings = 
     mappings @ (mappings
                 |> Seq.countBy fst
                 |> Seq.filter (fun (key, count) -> count > 1 || key |> configurationDetails.IsMultimap)
@@ -66,3 +66,10 @@ let createAcrMappings (configurationDetails : AutomapperConfigData) mappings =
                        getGenericTypeSafely (typedefof<IEnumerable<_>>, key), 
                        getGenericTypeSafely (typedefof<UnityCollectionFacade<_>>, key))
                 |> Seq.toList)
+
+let createMappings ((behaviors : MappingBehaviors), (configuration : AutomapperConfigData), (types : Type seq)) =
+    let createMappings = if behaviors.HasFlag(MappingBehaviors.CollectionRegistration) then 
+                             createMappingsFromTypes >> (createAcrMappings configuration)
+                         else
+                             createMappingsFromTypes
+    createMappings(behaviors,configuration,types)
