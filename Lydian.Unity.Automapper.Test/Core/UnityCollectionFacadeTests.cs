@@ -5,7 +5,7 @@ using System;
 
 namespace Lydian.Unity.Automapper.Test.Core
 {
-	[TestClass]
+    [TestClass]
 	public class UnityCollectionFacadeTests
 	{
 		[TestMethod]
