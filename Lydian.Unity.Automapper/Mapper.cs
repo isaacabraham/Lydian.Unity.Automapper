@@ -7,10 +7,10 @@ using System.Diagnostics.Contracts;
 
 namespace Lydian.Unity.Automapper
 {
-	/// <summary>
-	/// Contains extension method entry points to the Unity Auto-mapper.
-	/// </summary>
-	public static class Mapper
+    /// <summary>
+    /// Contains extension method entry points to the Unity Auto-mapper.
+    /// </summary>
+    public static class Mapper
 	{
 		private readonly static MappingOptions NULL_MAPPING_OPTIONS = new MappingOptions();
 
@@ -21,8 +21,8 @@ namespace Lydian.Unity.Automapper
 		/// <param name="types">The array of interfaces and concretes to map up and register.</param>
 		public static void AutomapTypes(this IUnityContainer container, params Type[] types)
 		{
-			Contract.Requires<ArgumentNullException>(container != null, "container");
-			Contract.Requires<ArgumentNullException>(types != null, "types");
+			Contract.Requires(container != null, "container");
+			Contract.Requires(types != null, "types");
 
 			container.AutomapTypes(NULL_MAPPING_OPTIONS, types);
 		}
@@ -36,9 +36,9 @@ namespace Lydian.Unity.Automapper
 		[SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", Justification = "Code Contracts", MessageId = "1")]
 		public static void AutomapTypes(this IUnityContainer container, MappingOptions options, params Type[] types)
 		{
-			Contract.Requires<ArgumentNullException>(container != null, "container");
-			Contract.Requires<ArgumentNullException>(options != null, "options");
-			Contract.Requires<ArgumentNullException>(types != null, "types");
+			Contract.Requires(container != null, "container");
+			Contract.Requires(options != null, "options");
+			Contract.Requires(types != null, "types");
 
 			var controller = CreateController(container);
 			controller.RegisterTypes(options.Behaviors, types);
@@ -51,8 +51,8 @@ namespace Lydian.Unity.Automapper
 		/// <param name="assemblyNames">The list of full assembly names to register types from.</param>
 		public static void AutomapAssemblies(this IUnityContainer container, params String[] assemblyNames)
 		{
-			Contract.Requires<ArgumentNullException>(container != null, "container");
-			Contract.Requires<ArgumentNullException>(assemblyNames != null, "assemblyNames");
+			Contract.Requires(container != null, "container");
+			Contract.Requires(assemblyNames != null, "assemblyNames");
 
 			container.AutomapAssemblies(NULL_MAPPING_OPTIONS, assemblyNames);
 		}
@@ -66,9 +66,9 @@ namespace Lydian.Unity.Automapper
 		[SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", Justification = "Code Contracts", MessageId = "1")]
 		public static void AutomapAssemblies(this IUnityContainer container, MappingOptions options, params String[] assemblyNames)
 		{
-			Contract.Requires<ArgumentNullException>(container != null, "container");
-			Contract.Requires<ArgumentNullException>(options != null, "options");
-			Contract.Requires<ArgumentNullException>(assemblyNames != null, "assemblyNames");
+			Contract.Requires(container != null, "container");
+			Contract.Requires(options != null, "options");
+			Contract.Requires(assemblyNames != null, "assemblyNames");
 
 			var controller = CreateController(container);
 			controller.RegisterAssemblies(options.Behaviors, assemblyNames);
